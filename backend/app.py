@@ -12,6 +12,7 @@ import shutil
 import subprocess
 import tempfile
 import time
+import traceback
 import zipfile
 from pathlib import Path
 
@@ -189,6 +190,8 @@ def transcribe_folder(payload: dict):
 
             except Exception as e:
                 errores += 1
+                tb = traceback.format_exc()
+                print(f"\n❌ ERROR en {ruta.name}:\n{tb}", flush=True)
                 yield _evento({"type": "error", "archivo": ruta.name, "mensaje": str(e)})
 
         yield _evento({"type": "done", "total": total,
