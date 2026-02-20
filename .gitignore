@@ -1,0 +1,58 @@
+# ── Entorno virtual ──────────────────────────────────────────────
+venv/
+.venv/
+env/
+
+# ── Python ───────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# ── Archivos de audio (nunca subir grabaciones personales) ───────
+*.m4a
+*.mp3
+*.wav
+*.aac
+*.flac
+*.ogg
+
+# ── Transcripciones generadas ────────────────────────────────────
+*.txt
+!requirements.txt
+
+# ── Archivos temporales de transcripción ─────────────────────────
+transcribe_*.m4a
+transcribe_*.mp3
+transcribe_*.wav
+.transcriptotem_status.json
+
+# ── macOS ─────────────────────────────────────────────────────────
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# ── Modelos Whisper descargados (son muy pesados) ─────────────────
+*.mlmodel
+models/
+whisper_cache/
+~/.cache/whisper/
+
+# ── Configuración local (puede tener rutas personales) ───────────
+config.json
+
+# ── IDEs ──────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ── Logs ──────────────────────────────────────────────────────────
+*.log

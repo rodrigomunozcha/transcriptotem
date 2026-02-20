@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Transcriptotem</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:       #0f1117;
+      --card:     #161b22;
+      --hover:    #1c2128;
+      --blue:     #58a6ff;
+      --mint:     #3fb950;
+      --orange:   #f0883e;
+      --red:      #f85149;
+      --text:     #e6edf3;
+      --sub:      #8b949e;
+      --muted:    #6e7681;
+      --border:   #30363d;
+      --r:        8px;
+      --rl:       12px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.6; }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--card); border-bottom: 1px solid var(--border);
+      padding: 0 1.5rem; height: 58px;
+      display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .logo { font-size: 1.15rem; font-weight: 700; letter-spacing: -0.02em; flex-shrink: 0; }
+    .logo span { color: var(--mint); }
+
+    /* Server status pill */
+    .srv-pill {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.3rem 0.9rem; border-radius: 99px;
+      border: 1px solid var(--border); background: var(--hover);
+      font-size: 0.75rem; color: var(--muted);
+      cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+      user-select: none;
+    }
+    .srv-pill:hover { border-color: var(--blue); color: var(--text); }
+    .srv-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); transition: background 0.3s; flex-shrink: 0; }
+    .srv-dot.on  { background: var(--mint); box-shadow: 0 0 6px var(--mint); animation: blink 2s infinite; }
+    .srv-dot.mid { background: var(--orange); box-shadow: 0 0 6px var(--orange); animation: blink 0.7s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.35} }
+
+    /* ── LAYOUT ── */
+    .shell { display: flex; min-height: calc(100vh - 58px); }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 210px; min-width: 210px; background: var(--card);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; transition: all 0.3s; overflow: hidden;
+    }
+    .sidebar.collapsed { width: 40px; min-width: 40px; }
+    .sidebar-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.8rem 0.9rem; border-bottom: 1px solid var(--border);
+    }
+    .sidebar-title { font-size: 0.78rem; font-weight: 600; white-space: nowrap; }
+    .sidebar.collapsed .sidebar-title,
+    .sidebar.collapsed .sidebar-sub,
+    .sidebar.collapsed .hist-list,
+    .sidebar.collapsed .hist-empty { display: none; }
+    .sidebar-toggle {
+      background: none; border: 1px solid var(--border); color: var(--muted);
+      cursor: pointer; border-radius: 5px; padding: 0.1rem 0.35rem; font-size: 0.78rem;
+      transition: all 0.2s; flex-shrink: 0;
+    }
+    .sidebar-toggle:hover { border-color: var(--blue); color: var(--text); }
+    .sidebar-sub { padding: 0.5rem 0.9rem; font-size: 0.7rem; color: var(--muted); line-height: 1.4; }
+    .hist-empty { padding: 0.9rem; font-size: 0.75rem; color: var(--muted); }
+    .hist-list { list-style: none; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 0.3rem; padding: 0.4rem; }
+    .hist-item { background: var(--hover); border: 1px solid var(--border); border-radius: var(--r); padding: 0.55rem 0.7rem; }
+    .hist-top { display: flex; justify-content: space-between; gap: 0.4rem; margin-bottom: 0.35rem; }
+    .hist-name { font-size: 0.75rem; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .hist-time { font-size: 0.68rem; color: var(--muted); white-space: nowrap; }
+    .hist-actions { display: flex; gap: 0.3rem; }
+    .mini-btn {
+      font-size: 0.68rem; padding: 0.18rem 0.45rem;
+      background: var(--card); border: 1px solid var(--border);
+      color: var(--sub); border-radius: 4px; cursor: pointer; transition: all 0.15s;
+    }
+    .mini-btn:hover { border-color: var(--blue); color: var(--blue); }
+
+    /* ── CONTENT ── */
+    .content { flex: 1; overflow-y: auto; }
+    main { max-width: 860px; margin: 0 auto; padding: 1.5rem; }
+
+    /* ── TABS ── */
+    .tabs { display: flex; gap: 0.2rem; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; }
+    .tab-btn {
+      background: none; border: none; border-bottom: 2px solid transparent;
+      color: var(--muted); cursor: pointer; padding: 0.55rem 1rem;
+      font-size: 0.86rem; font-weight: 500; font-family: inherit;
+      transition: all 0.2s; margin-bottom: -1px;
+    }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── SERVER PANEL ── */
+    .srv-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--rl); overflow: hidden; margin-bottom: 1.25rem; }
+    .srv-hero { padding: 1.75rem 2rem; display: flex; align-items: center; gap: 1.75rem; flex-wrap: wrap; border-bottom: 1px solid var(--border); }
+    .srv-icon { font-size: 2.75rem; flex-shrink: 0; }
+    .srv-info { flex: 1; min-width: 180px; }
+    .srv-info h2 { font-size: 1.05rem; font-weight: 600; margin-bottom: 0.25rem; }
+    .srv-info p { font-size: 0.81rem; color: var(--muted); line-height: 1.5; }
+    .btn-srv {
+      padding: 0.7rem 1.75rem; border-radius: 9px; border: none;
+      font-size: 0.88rem; font-weight: 700; font-family: inherit;
+      cursor: pointer; transition: all 0.2s; white-space: nowrap; flex-shrink: 0;
+    }
+    .btn-srv.start { background: var(--mint); color: #0d1117; }
+    .btn-srv.start:hover { filter: brightness(1.1); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(63,185,80,0.3); }
+    .btn-srv.stop { background: transparent; color: var(--red); border: 1px solid var(--red); }
+    .btn-srv.stop:hover { background: rgba(248,81,73,0.1); }
+    .btn-srv:disabled { opacity: 0.45; cursor: not-allowed; transform: none !important; }
+    .chips-row { padding: 0.8rem 2rem; display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+    .chip {
+      display: flex; align-items: center; gap: 0.35rem;
+      font-size: 0.75rem; padding: 0.22rem 0.6rem;
+      border-radius: 99px; border: 1px solid var(--border);
+      background: var(--hover); color: var(--muted);
+    }
+    .chip-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); }
+    .chip.ok  { color: var(--mint); border-color: rgba(63,185,80,0.3); background: rgba(63,185,80,0.08); }
+    .chip.ok .chip-dot { background: var(--mint); }
+    .chip.mid { color: var(--orange); border-color: rgba(240,136,62,0.3); background: rgba(240,136,62,0.08); }
+    .chip.mid .chip-dot { background: var(--orange); animation: blink 1s infinite; }
+    .srv-log {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.73rem;
+      color: var(--muted); padding: 0.8rem 1.5rem;
+      border-top: 1px solid var(--border); min-height: 2.8rem;
+      line-height: 1.6; background: rgba(0,0,0,0.18);
+    }
+
+    /* ── TRANSCRIPTION PANEL ── */
+    /* Mode selector */
+    .mode-selector {
+      display: flex; gap: 0; margin-bottom: 1.25rem;
+      background: var(--hover); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 4px; width: fit-content;
+    }
+    .mode-opt {
+      padding: 0.45rem 1.25rem; border-radius: 6px; border: none;
+      font-family: inherit; font-size: 0.84rem; font-weight: 500;
+      cursor: pointer; transition: all 0.2s;
+      background: transparent; color: var(--muted);
+    }
+    .mode-opt:hover:not(.active) { color: var(--sub); }
+    .mode-opt.active { background: var(--card); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+
+    /* Drop zone */
+    .drop-zone {
+      border: 2px dashed var(--border); border-radius: var(--rl);
+      padding: 1.75rem; text-align: center; cursor: pointer;
+      transition: all 0.2s; margin-bottom: 1rem;
+    }
+    .drop-zone:hover, .drop-zone.over { border-color: var(--blue); background: rgba(88,166,255,0.04); }
+    .dz-icon { font-size: 2.25rem; margin-bottom: 0.6rem; }
+    .dz-text { font-size: 0.88rem; color: var(--sub); line-height: 1.6; }
+    .dz-text strong { color: var(--text); }
+    .dz-hint { font-size: 0.78rem; color: var(--muted); margin-top: 0.35rem; }
+    .btn-pick {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      margin-top: 0.7rem; padding: 0.45rem 1.1rem;
+      background: var(--hover); border: 1px solid var(--border);
+      color: var(--text); border-radius: var(--r);
+      font-size: 0.84rem; font-family: inherit; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-pick:hover { border-color: var(--blue); color: var(--blue); }
+    input[type="file"] { display: none; }
+
+    /* Folder mode panel */
+    .folder-panel {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--rl); padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .folder-panel h3 { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.3rem; }
+    .folder-panel p { font-size: 0.8rem; color: var(--muted); line-height: 1.6; margin-bottom: 1rem; }
+    .folder-row {
+      display: flex; align-items: center; gap: 0.85rem;
+      background: var(--hover); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 0.75rem 1rem; margin-bottom: 0.6rem;
+    }
+    .folder-ico { font-size: 1.3rem; flex-shrink: 0; }
+    .folder-info { flex: 1; min-width: 0; }
+    .folder-lbl { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .folder-path { font-size: 0.78rem; font-family: 'JetBrains Mono', monospace; color: var(--blue); word-break: break-all; margin-top: 0.15rem; }
+    .btn-folder-scan {
+      width: 100%; padding: 0.7rem; margin-top: 0.5rem;
+      background: var(--blue); color: #0d1117;
+      border: none; border-radius: var(--r);
+      font-size: 0.9rem; font-weight: 700; font-family: inherit;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-folder-scan:hover:not(:disabled) { filter: brightness(1.1); }
+    .btn-folder-scan:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* Controls */
+    .controls { display: flex; flex-wrap: wrap; gap: 0.85rem; margin-bottom: 1rem; }
+    .ctrl { display: flex; flex-direction: column; gap: 0.35rem; flex: 1; min-width: 160px; }
+    label { font-size: 0.75rem; font-weight: 500; color: var(--sub); }
+    select, textarea {
+      background: var(--card); border: 1px solid var(--border);
+      color: var(--text); border-radius: var(--r);
+      font-family: inherit; font-size: 0.86rem;
+      padding: 0.45rem 0.7rem; outline: none; transition: border-color 0.2s; appearance: none;
+    }
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236e7681' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 0.7rem center;
+      padding-right: 1.8rem; cursor: pointer;
+    }
+    select:focus, textarea:focus { border-color: var(--blue); }
+    textarea { resize: vertical; min-height: 62px; line-height: 1.5; font-size: 0.8rem; }
+
+    /* Process button */
+    #procesar-section { display: none; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .btn-proc {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.5rem 1.2rem; background: var(--hover);
+      border: 1px solid var(--border); color: var(--text);
+      border-radius: var(--r); font-size: 0.86rem; font-family: inherit;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-proc:hover { border-color: var(--blue); color: var(--blue); }
+    .btn-proc.danger { color: var(--red); border-color: rgba(248,81,73,0.3); }
+    .btn-proc.danger:hover { background: rgba(248,81,73,0.1); }
+    .btn-proc:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* Progress */
+    .prog-section { margin-bottom: 1rem; }
+    .prog-track { background: var(--hover); border-radius: 99px; height: 4px; overflow: hidden; margin-bottom: 0.45rem; }
+    .prog-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--blue), var(--mint)); border-radius: 99px; transition: width 0.4s ease; }
+    .prog-status { font-size: 0.81rem; color: var(--sub); }
+    .prog-eta { font-size: 0.73rem; color: var(--muted); margin-top: 0.2rem; font-family: 'JetBrains Mono', monospace; }
+
+    /* Queue */
+    .queue-wrap { margin-bottom: 1rem; }
+    .queue-list { list-style: none; display: flex; flex-direction: column; gap: 0.3rem; }
+    .q-item {
+      display: flex; align-items: center; gap: 0.65rem;
+      padding: 0.45rem 0.7rem; background: var(--card);
+      border: 1px solid var(--border); border-radius: var(--r); font-size: 0.85rem;
+    }
+    .badge { font-size: 0.69rem; padding: 0.15rem 0.45rem; border-radius: 4px; font-weight: 500; white-space: nowrap; }
+    .b-pending  { background: rgba(139,148,158,0.15); color: var(--muted); }
+    .b-working  { background: rgba(88,166,255,0.15);  color: var(--blue); }
+    .b-done     { background: rgba(63,185,80,0.15);   color: var(--mint); }
+    .b-error    { background: rgba(248,81,73,0.15);   color: var(--red); }
+    .q-remove {
+      margin-left: auto; background: none; border: none;
+      color: var(--muted); cursor: pointer; font-size: 0.88rem;
+      padding: 0 0.2rem; border-radius: 3px; transition: color 0.15s;
+    }
+    .q-remove:hover { color: var(--red); }
+
+    /* Transcript */
+    .transcript-wrap { margin-bottom: 1rem; }
+    .transcript {
+      width: 100%; min-height: 200px; background: var(--card);
+      border: 1px solid var(--border); border-radius: var(--r);
+      color: var(--text); font-family: inherit; font-size: 0.86rem;
+      padding: 0.75rem; line-height: 1.75; resize: vertical; outline: none;
+    }
+
+    /* Export */
+    .export-row { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-bottom: 1rem; }
+    .btn-exp {
+      padding: 0.42rem 0.9rem; background: var(--hover);
+      border: 1px solid var(--border); color: var(--text);
+      border-radius: var(--r); font-size: 0.8rem; font-family: inherit;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .btn-exp:hover:not(:disabled) { border-color: var(--mint); color: var(--mint); }
+    .btn-exp:disabled { opacity: 0.38; cursor: not-allowed; }
+
+    /* Info boxes */
+    .info { background: rgba(88,166,255,0.06); border: 1px solid rgba(88,166,255,0.2); border-radius: var(--r); padding: 0.8rem 1rem; font-size: 0.8rem; color: var(--sub); line-height: 1.7; margin-bottom: 1rem; }
+    .info strong { color: var(--blue); }
+    .info.warn { border-color: rgba(240,136,62,0.35); background: rgba(240,136,62,0.06); }
+    .info.warn strong { color: var(--orange); }
+
+    @media (max-width: 600px) {
+      .sidebar { display: none; }
+      .srv-hero { flex-direction: column; }
+      .btn-srv { width: 100%; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ HEADER ══════════════════════════════════════════════════ -->
+<header>
+  <div class="logo">Transcripto<span>tem</span></div>
+  <div class="srv-pill" onclick="document.querySelector('[data-tab=servidor]').click()">
+    <div class="srv-dot" id="hdr-dot"></div>
+    <span id="hdr-txt">Servidor apagado</span>
+  </div>
+</header>
+
+<div class="shell">
+
+  <!-- ══ SIDEBAR ══════════════════════════════════════════════ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title">Historial</div>
+      <button class="sidebar-toggle" id="btn-collapse">⟨</button>
+    </div>
+    <div class="sidebar-sub">Sesión actual. Cierra la app para limpiar.</div>
+    <div class="hist-empty" id="hist-empty">Aún no hay transcripciones.</div>
+    <ul class="hist-list" id="hist-list" style="display:none;"></ul>
+  </aside>
+
+  <!-- ══ MAIN ════════════════════════════════════════════════ -->
+  <div class="content">
+    <main>
+
+      <div class="tabs">
+        <button class="tab-btn" data-tab="servidor">⚙️ Servidor</button>
+        <button class="tab-btn active" data-tab="transcribir">🎙 Transcribir</button>
+      </div>
+
+      <!-- ── SERVIDOR ─────────────────────────────────────── -->
+      <div id="panel-servidor" class="tab-panel">
+
+        <div class="srv-card">
+          <div class="srv-hero">
+            <div class="srv-icon" id="srv-icon">🖥️</div>
+            <div class="srv-info">
+              <h2 id="srv-title">Servidor apagado</h2>
+              <p id="srv-desc">El servidor procesa el audio con Whisper en tu M3. Inícialo antes de transcribir. Cuando termines, apágalo — el Mac queda completamente libre.</p>
+            </div>
+            <button class="btn-srv start" id="btn-srv" onclick="toggleServidor()">▶ Iniciar</button>
+          </div>
+          <div class="chips-row">
+            <div class="chip" id="chip-srv"><div class="chip-dot"></div><span>Servidor: apagado</span></div>
+            <div class="chip" id="chip-wsp"><div class="chip-dot"></div><span>Whisper: no cargado</span></div>
+            <div class="chip" id="chip-url"><div class="chip-dot"></div><span>localhost:8000</span></div>
+          </div>
+          <div class="srv-log" id="srv-log">Presiona Iniciar para comenzar.</div>
+        </div>
+
+        <div class="info">
+          <strong>Ciclo de uso recomendado</strong><br>
+          1. Presiona <strong>Iniciar</strong> — espera el indicador verde.<br>
+          2. Ve a <strong>🎙 Transcribir</strong> — sube archivos o procesa la carpeta OneDrive.<br>
+          3. Descarga tus .txt cuando termines.<br>
+          4. Presiona <strong>Apagar</strong> — el Mac queda 100% libre. No queda nada corriendo.
+        </div>
+
+        <div class="info warn">
+          <strong>¿Cómo iniciar el servidor?</strong><br>
+          Abre Terminal, pega estos dos comandos y déjala minimizada:<br>
+          <div style="position:relative; margin-top:0.5rem;">
+            <pre id="cmd-block" style="font-family:'JetBrains Mono',monospace; font-size:0.76rem; color:var(--blue); background:rgba(0,0,0,0.25); border:1px solid var(--border); border-radius:6px; padding:0.65rem 3rem 0.65rem 0.85rem; line-height:1.9; white-space:pre-wrap; word-break:break-all; overflow-x:hidden; margin:0;">cd "/Users/TU_USUARIO/ruta/a/Transcriptotem_WebApp_BACKUP"
+source venv/bin/activate &amp;&amp; python3 main.py</pre>
+            <button onclick="copiarComandos()" title="Copiar comandos" style="position:absolute; top:0.45rem; right:0.45rem; background:var(--hover); border:1px solid var(--border); color:var(--sub); border-radius:5px; padding:0.2rem 0.5rem; font-size:0.72rem; cursor:pointer; transition:all 0.2s;" id="btn-copy-cmd">📋 Copiar</button>
+          </div>
+          La app detectará el servidor automáticamente en segundos.
+        </div>
+
+      </div>
+
+      <!-- ── TRANSCRIBIR ────────────────────────────────────── -->
+      <div id="panel-transcribir" class="tab-panel active">
+
+        <!-- Aviso servidor apagado -->
+        <div class="info warn" id="aviso-srv" style="display:none;">
+          ⚠️ El servidor no está activo. Ve a <strong>⚙️ Servidor</strong> e inícialo primero.
+        </div>
+
+        <!-- Selector de modo -->
+        <div class="mode-selector">
+          <button class="mode-opt active" id="mode-manual" onclick="setMode('manual')">📂 Subir archivos</button>
+          <button class="mode-opt" id="mode-carpeta" onclick="setMode('carpeta')">📁 Procesar carpeta OneDrive</button>
+        </div>
+
+        <!-- ─ MODO MANUAL ─ -->
+        <div id="panel-manual">
+          <div class="drop-zone" id="drop-zone">
+            <div class="dz-icon">📁</div>
+            <p class="dz-text"><strong>Arrastra aquí</strong> tus archivos de audio</p>
+            <p class="dz-hint">.m4a · .mp3 · .wav — múltiples archivos aceptados</p>
+            <button class="btn-pick" id="btn-pick">Seleccionar archivos</button>
+          </div>
+          <input type="file" id="file-input" accept=".m4a,.mp3,.wav" multiple>
+
+          <div id="procesar-section" style="display:none; gap:0.6rem; flex-wrap:wrap; margin-bottom:1rem; display:none;">
+            <button class="btn-proc" id="btn-procesar">▶ Procesar todos</button>
+            <button class="btn-proc danger" id="btn-detener" style="display:none;">⏹ Detener</button>
+          </div>
+        </div>
+
+        <!-- ─ MODO CARPETA ─ -->
+        <div id="panel-carpeta" style="display:none;">
+          <div class="folder-panel">
+            <h3>📁 Carpeta OneDrive — Pendientes</h3>
+            <p>El servidor leerá directamente los audios de tu carpeta <em>Pendientes</em>, los transcribirá y moverá a <em>Archivados</em>. Los .txt quedan en <em>Transcritas</em>.<br>No necesitas descargar nada ni hacer nada manual en el Mac.</p>
+
+            <div class="folder-row">
+              <div class="folder-ico">📥</div>
+              <div class="folder-info">
+                <div class="folder-lbl">Entrada — tus audios del Galaxy S22</div>
+                <div class="folder-path">~/OneDrive-Personal/3 Recursos/Grabaciones Clases/Pendientes</div>
+              </div>
+            </div>
+            <div class="folder-row">
+              <div class="folder-ico">📄</div>
+              <div class="folder-info">
+                <div class="folder-lbl">Salida — transcripciones .txt</div>
+                <div class="folder-path">~/OneDrive-Personal/3 Recursos/Grabaciones Clases/Transcritas</div>
+              </div>
+            </div>
+            <div class="folder-row">
+              <div class="folder-ico">📦</div>
+              <div class="folder-info">
+                <div class="folder-lbl">Archivados — audios procesados (no se reprocesarán)</div>
+                <div class="folder-path">~/OneDrive-Personal/3 Recursos/Grabaciones Clases/Archivados</div>
+              </div>
+            </div>
+
+            <div id="carpeta-status" style="display:none; margin-top:0.75rem; padding:0.65rem 0.9rem; background:var(--hover); border:1px solid var(--border); border-radius:var(--r); font-size:0.8rem; color:var(--sub);"></div>
+
+            <button class="btn-folder-scan" id="btn-scan" onclick="procesarCarpeta()">
+              ▶ Transcribir carpeta Pendientes
+            </button>
+          </div>
+        </div>
+
+        <!-- ─ CONTROLES COMUNES ─ -->
+        <div class="controls">
+          <div class="ctrl" style="flex:1 1 240px;">
+            <label for="ctx-preset">Preset por ramo</label>
+            <select id="ctx-preset">
+              <option value="">(Selecciona para insertar contexto)</option>
+              <optgroup label="🎓 GENÉRICO">
+                <option data-prompt="Transcripción de clase universitaria en Chile. Transcribir únicamente la voz del profesor. Ignorar conversaciones de alumnos en el fondo.">Clase universitaria (genérico)</option>
+              </optgroup>
+              <optgroup label="📐 SEM 1">
+                <option data-prompt="Clase de fundamentos matemáticos. Términos: álgebra, ecuaciones, funciones, límites, derivadas, números reales, conjuntos.">Fundamentos Matemáticos</option>
+                <option data-prompt="Clase de liderazgo y ética organizacional en Chile. Términos: liderazgo, valores, ética, toma de decisiones, organizaciones.">Liderazgo Basado en Valores</option>
+                <option data-prompt="Clase de gestión organizacional. Términos: empresa, organización, estructura, caso de estudio, gestión, management.">Contexto Organizacional</option>
+                <option data-prompt="Clase universitaria de contabilidad en Chile. Términos: activo, pasivo, patrimonio, balance, estado de resultados, debe, haber, libro mayor.">Contabilidad</option>
+                <option data-prompt="Clase de business analytics. Términos: datos, análisis, Excel, dashboard, métricas, KPI, visualización, base de datos.">Taller Business Analytics I</option>
+                <option data-prompt="Clase de filosofía universitaria. Términos: epistemología, ontología, ética, Platón, Aristóteles, Kant, lógica, metafísica.">Intro. Pensamiento Filosófico</option>
+              </optgroup>
+              <optgroup label="📗 SEM 2">
+                <option data-prompt="Clase de métodos matemáticos. Términos: cálculo diferencial, integral, matrices, álgebra lineal, vectores, determinantes.">Métodos Matemáticos I</option>
+                <option data-prompt="Clase introductoria de economía en Chile. Términos: oferta, demanda, mercado, precio, escasez, recursos, producción, consumo.">Introducción a la Economía</option>
+                <option data-prompt="Clase de negocios sostenibles. Términos: sostenibilidad, ESG, impacto ambiental, responsabilidad social, economía circular, stakeholders.">Gestión de Negocios Sostenible</option>
+                <option data-prompt="Clase de contabilidad financiera en Chile. Términos: IFRS, estados financieros, flujo de caja, depreciación, amortización, patrimonio.">Contabilidad Financiera</option>
+                <option data-prompt="Clase de comunicación y habilidades blandas. Términos: comunicación oral, presentaciones, argumentación, persuasión, feedback.">Comunicación Efectiva</option>
+                <option data-prompt="Clase de desarrollo personal e identidad. Términos: propósito, valores, vocación, autoconocimiento, proyecto de vida.">Identidad Personal</option>
+              </optgroup>
+              <optgroup label="📘 SEM 3">
+                <option data-prompt="Clase avanzada de business analytics. Términos: Python, SQL, machine learning, modelo predictivo, regresión, clustering, Power BI.">Taller Business Analytics II</option>
+                <option data-prompt="Clase de métodos matemáticos avanzados. Términos: ecuaciones diferenciales, series, optimización, cálculo multivariable.">Métodos Matemáticos II</option>
+                <option data-prompt="Clase universitaria de macroeconomía en Chile. Términos: PIB, inflación, desempleo, política monetaria, banco central, tipo de cambio, ciclo económico.">Macroeconomía</option>
+                <option data-prompt="Clase de derecho aplicado a los negocios en Chile. Términos: contrato, sociedad, responsabilidad, código civil, código de comercio, tributario, SII.">Aspectos Legales</option>
+                <option data-prompt="Clase de marketing. Términos: segmentación, posicionamiento, marketing mix, producto, precio, plaza, promoción, buyer persona, branding.">Fundamentos del Marketing</option>
+                <option data-prompt="Clase de antropología filosófica. Términos: persona, libertad, dignidad, naturaleza humana, existencia, filosofía, ética, bien común.">Antropología Filosófica</option>
+              </optgroup>
+              <optgroup label="📙 SEM 4">
+                <option data-prompt="Clase de estadística universitaria. Términos: media, mediana, desviación estándar, distribución normal, probabilidad, intervalo de confianza.">Estadística I</option>
+                <option data-prompt="Clase de gestión de personas. Términos: reclutamiento, selección, capacitación, desempeño, compensaciones, cultura organizacional.">Gestión de Talento</option>
+                <option data-prompt="Clase de contabilidad de costos. Términos: costo fijo, costo variable, punto de equilibrio, margen de contribución, costeo ABC, presupuesto.">Costos y Decisiones</option>
+                <option data-prompt="Clase de comportamiento del consumidor. Términos: percepción, motivación, actitud, proceso de compra, segmentación, psicología del consumidor.">Conducta del Consumidor</option>
+              </optgroup>
+              <optgroup label="📕 SEM 5">
+                <option data-prompt="Clase de estadística avanzada. Términos: regresión lineal, regresión múltiple, ANOVA, prueba de hipótesis, p-valor, chi-cuadrado.">Estadística II</option>
+                <option data-prompt="Clase universitaria de microeconomía en Chile. El profesor tiene acento mixto polaco-español-chileno. Términos: elasticidad, demanda, oferta, utilidad marginal, costo de oportunidad, equilibrio, homo economicus, excedente del consumidor, Daniel Kahneman, economía conductual, racionalidad acotada, sesgos cognitivos, nudge, restricción presupuestaria, bienes Giffen, efecto sustitución, efecto ingreso.">Microeconomía</option>
+                <option data-prompt="Clase de finanzas corporativas. Términos: VAN, TIR, flujo de caja, costo de capital, WACC, valorización, riesgo, rentabilidad.">Administración Financiera</option>
+                <option data-prompt="Clase de investigación de mercados. Términos: metodología cualitativa, cuantitativa, encuesta, focus group, muestra, análisis de datos, insight.">Investigación de Mercados</option>
+              </optgroup>
+              <optgroup label="📒 SEM 6">
+                <option data-prompt="Clase universitaria de econometría. Términos: regresión, MCO, mínimos cuadrados, heterocedasticidad, autocorrelación, multicolinealidad, variable instrumental.">Econometría</option>
+                <option data-prompt="Clase de marketing estratégico. Términos: estrategia, ventaja competitiva, posicionamiento, brand equity, ciclo de vida del producto, go-to-market.">Marketing Estratégico</option>
+                <option data-prompt="Clase de organización industrial. Términos: monopolio, oligopolio, competencia perfecta, poder de mercado, regulación, barreras de entrada.">Mercados y Estructura Económica</option>
+              </optgroup>
+              <optgroup label="📓 SEM 7">
+                <option data-prompt="Clase de finanzas corporativas avanzadas. Términos: estructura de capital, dividendos, fusiones, adquisiciones, valorización, mercado de capitales.">Finanzas Corporativas</option>
+                <option data-prompt="Clase de estrategia empresarial. Términos: análisis FODA, cinco fuerzas de Porter, cadena de valor, ventaja competitiva, visión, misión.">Dirección Estratégica</option>
+                <option data-prompt="Clase de gestión de operaciones. Términos: cadena de suministro, inventario, logística, procesos, lean, Six Sigma, capacidad productiva.">Gestión de Operaciones</option>
+              </optgroup>
+              <optgroup label="📔 SEM 8">
+                <option data-prompt="Clase de valorización de empresas. Términos: múltiplos, DCF, flujo de caja descontado, EBITDA, valor terminal, due diligence, M&A.">Valorización</option>
+                <option data-prompt="Clase de análisis económico avanzado. Términos: política económica, indicadores macroeconómicos, coyuntura, proyecciones, economía chilena, IMACEC.">Análisis Económico</option>
+                <option data-prompt="Clase de control de gestión. Términos: control de gestión, presupuesto, desviaciones, cuadro de mando, reporting.">Implementación y Control Estratégico</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="ctrl" style="flex:2 1 280px;">
+            <label for="ctx-text">Contexto del audio (editable)</label>
+            <textarea id="ctx-text" placeholder="(Opcional) Describe el audio para mejorar la precisión..."></textarea>
+          </div>
+        </div>
+
+        <div class="controls">
+          <div class="ctrl">
+            <label for="sel-lang">Perfil de idioma</label>
+            <select id="sel-lang">
+              <option value="es-chile">Español Chileno</option>
+              <option value="es-spain">Español de España</option>
+              <option value="es-neutro">Español Neutro</option>
+              <option value="en">Inglés</option>
+              <option value="accento-mixto">Acento Mixto (Polaco-Español-Chileno)</option>
+            </select>
+          </div>
+          <div class="ctrl">
+            <label for="sel-model">Modelo Whisper</label>
+            <select id="sel-model">
+              <optgroup label="Velocidad (menos calor)">
+                <option value="mlx-community/whisper-tiny-mlx">Tiny — Ultrarrápido</option>
+                <option value="mlx-community/whisper-base-mlx">Base — Rápido</option>
+              </optgroup>
+              <optgroup label="Equilibrio">
+                <option value="mlx-community/whisper-small-mlx">Small — Equilibrado</option>
+                <option value="mlx-community/whisper-medium-mlx">Medium — Preciso</option>
+              </optgroup>
+              <optgroup label="Precisión (más calor)">
+                <option value="mlx-community/whisper-large-v3-turbo" selected>Large Turbo ⭐ — Recomendado</option>
+                <option value="mlx-community/whisper-large-v3-mlx">Large v3 — Máxima precisión</option>
+              </optgroup>
+            </select>
+          </div>
+        </div>
+
+        <!-- Progreso -->
+        <div class="prog-section">
+          <div class="prog-track"><div class="prog-fill" id="prog-bar"></div></div>
+          <p class="prog-status" id="prog-status">Listo.</p>
+          <p class="prog-eta" id="prog-eta"></p>
+        </div>
+
+        <!-- Cola -->
+        <div class="queue-wrap" id="queue-wrap" style="display:none;">
+          <label style="font-size:0.75rem; font-weight:500; color:var(--sub); display:block; margin-bottom:0.4rem;">Archivos en cola</label>
+          <ul class="queue-list" id="queue-list"></ul>
+        </div>
+
+        <!-- Transcripción -->
+        <div class="transcript-wrap">
+          <label for="transcript" style="font-size:0.75rem; font-weight:500; color:var(--sub); display:block; margin-bottom:0.4rem;">Transcripción</label>
+          <textarea id="transcript" class="transcript" placeholder="El texto transcrito aparecerá aquí..." readonly></textarea>
+        </div>
+
+        <!-- Exportación -->
+        <div class="export-row">
+          <button class="btn-exp" id="btn-txt"  disabled>↓ TXT</button>
+          <button class="btn-exp" id="btn-pdf"  disabled>↓ PDF</button>
+          <button class="btn-exp" id="btn-docx" disabled>↓ DOCX</button>
+          <button class="btn-exp" id="btn-zip"  disabled>↓ ZIP todo</button>
+        </div>
+
+      </div><!-- /panel-transcribir -->
+
+    </main>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════════
+// TRANSCRIPTOTEM — versión simplificada
+// Un servidor. Nada en background. Zero residual.
+// ════════════════════════════════════════════════════════════════
+
+const API = 'http://localhost:8000';
+
+// ── Estado ─────────────────────────────────────────────────────
+let srvActivo       = false;
+let cola            = [];
+let archivoActual   = null;
+let texto           = '';
+let procesando      = false;
+let detener         = false;
+let abort           = null;
+let historial       = [];
+let srvInterval     = null;
+let modoActual      = 'manual';  // 'manual' | 'carpeta'
+
+// ── DOM ────────────────────────────────────────────────────────
+const dropZone   = document.getElementById('drop-zone');
+const fileInput  = document.getElementById('file-input');
+const progBar    = document.getElementById('prog-bar');
+const progStatus = document.getElementById('prog-status');
+const progEta    = document.getElementById('prog-eta');
+const transcript = document.getElementById('transcript');
+const queueWrap  = document.getElementById('queue-wrap');
+const queueList  = document.getElementById('queue-list');
+const btnTxt     = document.getElementById('btn-txt');
+const btnPdf     = document.getElementById('btn-pdf');
+const btnDocx    = document.getElementById('btn-docx');
+const btnZip     = document.getElementById('btn-zip');
+const btnProc    = document.getElementById('btn-procesar');
+const btnDet     = document.getElementById('btn-detener');
+const ctxPreset  = document.getElementById('ctx-preset');
+const ctxText    = document.getElementById('ctx-text');
+
+// ── TABS ───────────────────────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ── SIDEBAR ────────────────────────────────────────────────────
+document.getElementById('btn-collapse').addEventListener('click', () => {
+  const sb = document.getElementById('sidebar');
+  const c  = sb.classList.toggle('collapsed');
+  document.getElementById('btn-collapse').textContent = c ? '⟩' : '⟨';
+});
+
+// ── MODO MANUAL / CARPETA ──────────────────────────────────────
+function setMode(mode) {
+  modoActual = mode;
+  document.getElementById('mode-manual').classList.toggle('active',   mode === 'manual');
+  document.getElementById('mode-carpeta').classList.toggle('active',  mode === 'carpeta');
+  document.getElementById('panel-manual').style.display   = mode === 'manual'  ? 'block' : 'none';
+  document.getElementById('panel-carpeta').style.display  = mode === 'carpeta' ? 'block' : 'none';
+  // Reset progress cuando cambias de modo
+  progBar.style.width = '0%';
+  progStatus.textContent = 'Listo.';
+  progEta.textContent = '';
+}
+
+// ── SERVIDOR ───────────────────────────────────────────────────
+function setSrvUI(estado) {
+  const dot   = document.getElementById('hdr-dot');
+  const txt   = document.getElementById('hdr-txt');
+  const btn   = document.getElementById('btn-srv');
+  const icon  = document.getElementById('srv-icon');
+  const title = document.getElementById('srv-title');
+  const desc  = document.getElementById('srv-desc');
+  const cSrv  = document.getElementById('chip-srv');
+  const cWsp  = document.getElementById('chip-wsp');
+  const aviso = document.getElementById('aviso-srv');
+
+  dot.className = 'srv-dot';
+  [cSrv, cWsp].forEach(c => c.className = 'chip');
+
+  if (estado === 'off') {
+    txt.textContent   = 'Servidor apagado';
+    btn.textContent   = '▶ Iniciar'; btn.className = 'btn-srv start'; btn.disabled = false;
+    icon.textContent  = '🖥️'; title.textContent = 'Servidor apagado';
+    desc.textContent  = 'Inícialo antes de transcribir. Al apagarlo, el Mac queda 100% libre.';
+    cSrv.innerHTML    = '<div class="chip-dot"></div><span>Servidor: apagado</span>';
+    cWsp.innerHTML    = '<div class="chip-dot"></div><span>Whisper: no cargado</span>';
+    aviso.style.display = 'block';
+    srvActivo = false;
+  } else if (estado === 'starting') {
+    dot.classList.add('mid'); txt.textContent = 'Iniciando...';
+    btn.textContent = '⏳ Iniciando...'; btn.disabled = true;
+    icon.textContent = '⏳'; title.textContent = 'Iniciando servidor...';
+    desc.textContent = 'Cargando Whisper en el M3. Tarda unos segundos.';
+    cSrv.classList.add('mid'); cSrv.innerHTML = '<div class="chip-dot"></div><span>Servidor: iniciando</span>';
+    cWsp.innerHTML = '<div class="chip-dot"></div><span>Whisper: cargando</span>';
+  } else if (estado === 'on') {
+    dot.classList.add('on'); txt.textContent = 'Servidor activo';
+    btn.textContent = '⏹ Apagar'; btn.className = 'btn-srv stop'; btn.disabled = false;
+    icon.textContent = '✅'; title.textContent = 'Servidor activo';
+    desc.textContent = 'Whisper listo. Ve a Transcribir y sube tus audios o procesa la carpeta OneDrive.';
+    cSrv.classList.add('ok'); cSrv.innerHTML = '<div class="chip-dot"></div><span>Servidor: activo</span>';
+    cWsp.classList.add('ok'); cWsp.innerHTML = '<div class="chip-dot"></div><span>Whisper: listo (M3 ⚡)</span>';
+    aviso.style.display = 'none';
+    srvActivo = true;
+  }
+}
+
+function logSrv(msg) {
+  const t = new Date().toLocaleTimeString('es-CL');
+  document.getElementById('srv-log').innerHTML = `[${t}] ${msg}`;
+}
+
+async function ping() {
+  try {
+    const r = await fetch(`${API}/`, { signal: AbortSignal.timeout(2000) });
+    return r.status < 500;
+  } catch { return false; }
+}
+
+async function toggleServidor() {
+  if (srvActivo) {
+    // Apagar
+    clearInterval(srvInterval);
+    setSrvUI('off');
+    document.getElementById('srv-log').innerHTML =
+      '<strong style="color:var(--mint)">✅ Servidor detenido desde la app.</strong><br>' +
+      '<span style="color:var(--sub)">Para liberar el Mac completamente, ve a Terminal y presiona:</span><br>' +
+      '<div style="position:relative;margin:0.4rem 0;">' +
+        '<pre id="cmd-shutdown" style="font-family:\'JetBrains Mono\',monospace;font-size:0.76rem;color:var(--orange);background:rgba(0,0,0,0.25);border:1px solid var(--border);border-radius:6px;padding:0.5rem 3rem 0.5rem 0.85rem;white-space:pre-wrap;word-break:break-all;margin:0;">Ctrl + C</pre>' +
+        '<button onclick="copiarCtrlC()" style="position:absolute;top:0.3rem;right:0.4rem;background:var(--hover);border:1px solid var(--border);color:var(--sub);border-radius:4px;padding:0.15rem 0.45rem;font-size:0.7rem;cursor:pointer;" id="btn-copy-shutdown">📋 Copiar</button>' +
+      '</div>' +
+      '<span style="color:var(--muted);font-size:0.75rem;">Después de eso, el Mac queda 100% libre. No queda ningún proceso corriendo.</span>';
+    return;
+  }
+  setSrvUI('starting');
+  logSrv('Verificando...');
+  if (await ping()) {
+    setSrvUI('on'); logSrv('Servidor detectado y listo ✓'); iniciarHeartbeat(); return;
+  }
+  // Mostrar instrucciones y esperar
+  document.getElementById('srv-log').innerHTML =
+    `<strong style="color:var(--orange)">Abre Terminal y ejecuta:</strong> ` +
+    `<button onclick="copiarComandos()" id="btn-copy-cmd" style="background:var(--hover);border:1px solid var(--border);color:var(--sub);border-radius:4px;padding:0.1rem 0.45rem;font-size:0.7rem;cursor:pointer;">📋 Copiar</button><br>` +
+    `<pre style="color:var(--blue);font-family:'JetBrains Mono',monospace;font-size:0.73rem;background:rgba(0,0,0,0.2);border-radius:5px;padding:0.5rem 0.7rem;margin:0.35rem 0;white-space:pre-wrap;word-break:break-all;overflow-x:hidden;">cd "/Users/TU_USUARIO/ruta/a/Transcriptotem_WebApp_BACKUP"
+source venv/bin/activate &amp;&amp; python3 main.py</pre>` +
+    `<span style="color:var(--muted)">Detectaremos el servidor automáticamente...</span>`;
+
+  let intentos = 0;
+  srvInterval = setInterval(async () => {
+    intentos++;
+    if (await ping()) {
+      clearInterval(srvInterval);
+      setSrvUI('on'); logSrv('¡Servidor activo! ✓'); iniciarHeartbeat();
+    }
+    if (intentos > 60) { clearInterval(srvInterval); setSrvUI('off'); logSrv('Tiempo agotado. Verifica Terminal.'); }
+  }, 2000);
+}
+
+function iniciarHeartbeat() {
+  clearInterval(srvInterval);
+  srvInterval = setInterval(async () => {
+    if (srvActivo && !await ping()) { setSrvUI('off'); logSrv('⚠️ Conexión perdida con el servidor.'); }
+  }, 12000);
+}
+
+// Detectar al cargar
+window.addEventListener('load', async () => {
+  if (await ping()) { setSrvUI('on'); logSrv('Servidor detectado al cargar ✓'); iniciarHeartbeat(); }
+  else setSrvUI('off');
+});
+
+// ── HISTORIAL ──────────────────────────────────────────────────
+function actualizarHistorial() {
+  const empty = document.getElementById('hist-empty');
+  const list  = document.getElementById('hist-list');
+  if (!historial.length) { empty.style.display='block'; list.style.display='none'; return; }
+  empty.style.display = 'none'; list.style.display = 'flex';
+  list.innerHTML = historial.map(h => {
+    const hora = new Date(h.ts).toLocaleTimeString('es-CL', {hour:'2-digit', minute:'2-digit'});
+    return `<li class="hist-item">
+      <div class="hist-top">
+        <div class="hist-name" title="${h.nombre}">${h.nombre}</div>
+        <div class="hist-time">${hora}</div>
+      </div>
+      <div class="hist-actions">
+        <button class="mini-btn" data-action="txt" data-n="${encodeURIComponent(h.nombre)}">↓ TXT</button>
+        <button class="mini-btn" data-action="ver" data-n="${encodeURIComponent(h.nombre)}">Ver</button>
+      </div>
+    </li>`;
+  }).join('');
+}
+
+document.getElementById('hist-list').addEventListener('click', e => {
+  const btn = e.target.closest('button'); if (!btn) return;
+  const nombre = decodeURIComponent(btn.dataset.n || '');
+  const item = historial.find(h => h.nombre === nombre); if (!item) return;
+  if (btn.dataset.action === 'txt') descargarTxt(item.nombre, item.texto);
+  if (btn.dataset.action === 'ver') {
+    transcript.value = item.texto; texto = item.texto;
+    archivoActual = item; progStatus.textContent = `Viendo: ${item.nombre}`; habilitarExport();
+  }
+});
+
+// ── PRESETS ────────────────────────────────────────────────────
+ctxPreset.addEventListener('change', () => {
+  const p = ctxPreset.options[ctxPreset.selectedIndex]?.getAttribute('data-prompt') || '';
+  if (p) ctxText.value = p;
+});
+
+// ── DRAG & DROP ────────────────────────────────────────────────
+dropZone.addEventListener('click', () => fileInput.click());
+document.getElementById('btn-pick').addEventListener('click', e => { e.stopPropagation(); fileInput.click(); });
+dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault(); dropZone.classList.remove('over');
+  const files = Array.from(e.dataTransfer.files).filter(f => /\.(m4a|mp3|wav)$/i.test(f.name));
+  if (files.length) agregarArchivos(files);
+});
+fileInput.addEventListener('change', () => {
+  if (fileInput.files.length) agregarArchivos(Array.from(fileInput.files));
+  fileInput.value = '';
+});
+
+// ── COLA ───────────────────────────────────────────────────────
+function agregarArchivos(files) {
+  cola = cola.concat(files.map(f => ({ file: f, nombre: f.name, estado: 'pendiente', texto: '' })));
+  renderCola();
+  document.getElementById('procesar-section').style.display = 'flex';
+  progStatus.textContent = `${cola.length} archivo(s) en cola.`;
+}
+
+function renderCola() {
+  queueWrap.style.display = cola.length ? 'block' : 'none';
+  queueList.innerHTML = cola.map((item, i) => `
+    <li class="q-item">
+      <span class="badge b-${item.estado === 'pendiente' ? 'pending' : item.estado === 'procesando' ? 'working' : item.estado === 'listo' ? 'done' : 'error'}">${item.estado}</span>
+      <span>${item.nombre}</span>
+      <span style="color:var(--muted);font-size:0.75rem;">${fmtBytes(item.file.size)}</span>
+      ${item.estado === 'pendiente' ? `<button class="q-remove" data-i="${i}">✕</button>` : ''}
+    </li>`).join('');
+  queueList.querySelectorAll('.q-remove').forEach(btn => {
+    btn.addEventListener('click', () => {
+      cola.splice(parseInt(btn.dataset.i), 1); renderCola();
+      if (!cola.length) { document.getElementById('procesar-section').style.display = 'none'; progStatus.textContent = 'Listo.'; }
+    });
+  });
+}
+
+function fmtBytes(b) {
+  if (b < 1024) return b + ' B';
+  if (b < 1048576) return (b/1024).toFixed(1) + ' KB';
+  return (b/1048576).toFixed(2) + ' MB';
+}
+
+// ── TRANSCRIPCIÓN MANUAL ───────────────────────────────────────
+async function transcribirUno(item, idx, total) {
+  progBar.style.width = '10%';
+  progStatus.textContent = `Enviando ${idx}/${total}: ${item.nombre}`;
+  progEta.textContent = 'Preparando...';
+  transcript.value = '';
+  item.estado = 'procesando'; archivoActual = item; renderCola();
+
+  const fd = new FormData();
+  fd.append('file', item.file);
+  fd.append('language', document.getElementById('sel-lang').value);
+  fd.append('model', document.getElementById('sel-model').value);
+  fd.append('context', ctxText.value || '');
+  abort = new AbortController();
+  progBar.style.width = '30%';
+  progStatus.textContent = `Transcribiendo ${idx}/${total}: ${item.nombre}`;
+
+  // Timer
+  const t0 = Date.now(); let durAudio = null;
+  try { const ac = new AudioContext(); const buf = await item.file.arrayBuffer(); durAudio = (await ac.decodeAudioData(buf)).duration; ac.close(); } catch(_) {}
+  const timer = setInterval(() => {
+    const el = Math.floor((Date.now()-t0)/1000);
+    let s = `⏱ ${pad(Math.floor(el/60))}:${pad(el%60)} transcurridos`;
+    if (durAudio) { const rest = Math.max(Math.round(durAudio/6 - el), 0); s += ` — restante ~${pad(Math.floor(rest/60))}:${pad(rest%60)}`; }
+    progEta.textContent = s + ' · Whisper activo ✓';
+  }, 1000);
+
+  try {
+    const res = await fetch(`${API}/api/transcribe`, { method:'POST', body:fd, signal:abort.signal });
+    if (!res.ok) { let d=`Error ${res.status}`; try{d=(await res.json()).detail||d;}catch(_){} throw new Error(d); }
+    const data = await res.json();
+    progBar.style.width = '100%';
+    item.estado = 'listo'; item.texto = data.text || '';
+    historial.unshift({ nombre: item.nombre, texto: item.texto, ts: Date.now() });
+    actualizarHistorial();
+    transcript.value = item.texto; texto = item.texto; transcript.scrollTop = 0;
+    progStatus.textContent = `✅ ${item.nombre}`; progEta.textContent = '';
+    renderCola(); habilitarExport();
+  } catch(err) {
+    if (err.name === 'AbortError' || detener) {
+      item.estado = 'pendiente'; renderCola();
+      progStatus.textContent = 'Detenido.'; progEta.textContent = ''; throw new Error('detenido');
+    }
+    item.estado = 'error'; renderCola();
+    progStatus.textContent = `Error: ${err.message}`; progEta.textContent = ''; throw err;
+  } finally { clearInterval(timer); abort = null; }
+}
+
+async function procesarCola() {
+  if (procesando) return;
+  const pend = cola.filter(a => a.estado === 'pendiente');
+  if (!pend.length) { progStatus.textContent = 'No hay archivos pendientes.'; return; }
+  procesando = true; detener = false;
+  btnProc.disabled = true; btnDet.style.display = 'inline-flex'; btnDet.disabled = false;
+  const total = cola.length;
+  try {
+    while (true) {
+      const item = cola.find(a => a.estado === 'pendiente'); if (!item) break;
+      const idx = cola.filter(a => a.estado === 'listo').length + 1;
+      await transcribirUno(item, idx, total);
+    }
+    progStatus.textContent = '¡Cola completada!';
+    progEta.textContent = 'Revisa el historial para descargar.';
+  } catch(_) {}
+  finally { procesando = false; btnProc.disabled = false; btnDet.style.display = 'none'; }
+}
+
+btnProc.addEventListener('click', procesarCola);
+btnDet.addEventListener('click', () => { detener = true; btnDet.disabled = true; if (abort) abort.abort(); });
+
+// ── MODO CARPETA ───────────────────────────────────────────────
+async function procesarCarpeta() {
+  if (!srvActivo) { progStatus.textContent = '⚠️ Inicia el servidor primero.'; return; }
+  const btn = document.getElementById('btn-scan');
+  const statusEl = document.getElementById('carpeta-status');
+  btn.disabled = true; btn.textContent = '⏳ Procesando...';
+  statusEl.style.display = 'block'; statusEl.textContent = 'Consultando carpeta Pendientes...';
+  progBar.style.width = '5%'; progStatus.textContent = 'Iniciando procesamiento de carpeta...'; progEta.textContent = '';
+
+  try {
+    const res = await fetch(`${API}/api/transcribe-folder`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        language: document.getElementById('sel-lang').value,
+        model: document.getElementById('sel-model').value,
+        context: ctxText.value || ''
+      })
+    });
+
+    if (!res.ok) {
+      let d = `Error ${res.status}`;
+      try { d = (await res.json()).detail || d; } catch(_) {}
+      throw new Error(d);
+    }
+
+    // Streaming de progreso: el endpoint devuelve JSON Lines
+    const reader = res.body.getReader();
+    const dec = new TextDecoder();
+    let buf = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      const lines = buf.split('\n');
+      buf = lines.pop(); // última línea puede estar incompleta
+      for (const line of lines) {
+        if (!line.trim()) continue;
+        try {
+          const ev = JSON.parse(line);
+          handleCarpetaEvent(ev, statusEl);
+        } catch(_) {}
+      }
+    }
+  } catch(err) {
+    progStatus.textContent = `Error: ${err.message}`;
+    statusEl.textContent = `Error: ${err.message}`;
+  } finally {
+    btn.disabled = false; btn.textContent = '▶ Transcribir carpeta Pendientes';
+  }
+}
+
+function handleCarpetaEvent(ev, statusEl) {
+  if (ev.type === 'start') {
+    progStatus.textContent = `${ev.total} archivo(s) encontrado(s) en Pendientes.`;
+    statusEl.textContent = ev.total > 0
+      ? `Procesando ${ev.total} audio(s)...`
+      : '✅ No hay archivos pendientes en la carpeta.';
+    if (ev.total === 0) { progBar.style.width = '100%'; }
+  }
+  else if (ev.type === 'progress') {
+    const pct = Math.round((ev.done / ev.total) * 100);
+    progBar.style.width = pct + '%';
+    progStatus.textContent = `Transcribiendo ${ev.done}/${ev.total}: ${ev.archivo}`;
+    progEta.textContent = ev.tiempo ? `⏱ ${ev.tiempo} · Whisper activo ✓` : '';
+    statusEl.textContent = `Procesando: ${ev.archivo} (${ev.done}/${ev.total})`;
+  }
+  else if (ev.type === 'done') {
+    progBar.style.width = '100%';
+    progStatus.textContent = `✅ ${ev.completados}/${ev.total} completados.`;
+    progEta.textContent = ev.errores > 0 ? `${ev.errores} error(es). Revisa el log del servidor.` : '';
+    statusEl.textContent = `Completado. ${ev.completados} transcripciones en carpeta Transcritas.`;
+    // Agregar al historial
+    (ev.resultados || []).forEach(r => {
+      if (r.texto) historial.unshift({ nombre: r.nombre, texto: r.texto, ts: Date.now() });
+    });
+    actualizarHistorial();
+    // Mostrar último texto en el área
+    if (ev.resultados?.length > 0 && ev.resultados[ev.resultados.length-1].texto) {
+      const last = ev.resultados[ev.resultados.length-1];
+      transcript.value = last.texto; texto = last.texto; habilitarExport();
+    }
+  }
+  else if (ev.type === 'error') {
+    progStatus.textContent = `❌ Error en ${ev.archivo}: ${ev.mensaje}`;
+  }
+}
+
+function pad(n) { return String(n).padStart(2,'0'); }
+
+// ── EXPORTACIÓN ────────────────────────────────────────────────
+function habilitarExport() {
+  const hay = (transcript.value || '').trim().length > 0;
+  [btnTxt, btnPdf, btnDocx, btnZip].forEach(b => b.disabled = !hay);
+}
+transcript.addEventListener('input', habilitarExport);
+
+function descargarTxt(nombre, contenido) {
+  const base = nombre.replace(/\.[^/.]+$/u, '');
+  const a = Object.assign(document.createElement('a'), {
+    href: URL.createObjectURL(new Blob([contenido], {type:'text/plain;charset=utf-8'})),
+    download: `${base}.txt`
+  });
+  document.body.appendChild(a); a.click(); a.remove();
+}
+
+btnTxt.addEventListener('click', () => {
+  const t = archivoActual?.texto || transcript.value || '';
+  if (t.trim()) descargarTxt(archivoActual?.nombre || 'transcripcion', t);
+});
+
+async function exportarAPI(endpoint, ext) {
+  const t = (archivoActual?.texto || transcript.value || '').trim(); if (!t) return;
+  const nombre = (archivoActual?.nombre || 'transcripcion').replace(/\.[^/.]+$/u, '');
+  try {
+    const res = await fetch(`${API}/api/export/${endpoint}`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ text: t, filename: nombre })
+    });
+    if (!res.ok) return;
+    const blob = await res.blob();
+    const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: `${nombre}.${ext}` });
+    document.body.appendChild(a); a.click(); a.remove();
+  } catch(e) { console.error(e); }
+}
+
+btnPdf.addEventListener('click',  () => exportarAPI('pdf',  'pdf'));
+btnDocx.addEventListener('click', () => exportarAPI('docx', 'docx'));
+btnZip.addEventListener('click', async () => {
+  if (!historial.length) return;
+  try {
+    const res = await fetch(`${API}/api/export/zip`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ items: historial.map(h => ({ filename: h.nombre, text: h.texto })) })
+    });
+    if (!res.ok) return;
+    const blob = await res.blob();
+    const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: 'transcripciones.zip' });
+    document.body.appendChild(a); a.click(); a.remove();
+  } catch(e) { console.error(e); }
+});
+  // ── Copiar comandos Terminal ───────────────────────────────────
+  function copiarCtrlC() {
+    // Ctrl+C no se puede copiar literalmente al clipboard con utilidad directa,
+    // así que copiamos el texto descriptivo
+    navigator.clipboard.writeText('Ctrl + C').catch(() => {});
+    const btn = document.getElementById('btn-copy-shutdown');
+    if (btn) {
+      const orig = btn.textContent;
+      btn.textContent = '✅ Copiado';
+      btn.style.color = 'var(--mint)';
+      setTimeout(() => { btn.textContent = orig; btn.style.color = ''; }, 2000);
+    }
+  }
+
+  function copiarComandos() {
+    const cmds = `cd "/Users/TU_USUARIO/ruta/a/Transcriptotem_WebApp_BACKUP"\nsource venv/bin/activate && python3 main.py`;
+    navigator.clipboard.writeText(cmds).then(() => {
+      const btn = document.getElementById('btn-copy-cmd');
+      if (btn) { const orig = btn.textContent; btn.textContent = '✅ Copiado'; btn.style.color='var(--mint)'; setTimeout(() => { btn.textContent = orig; btn.style.color=''; }, 2000); }
+    }).catch(() => {
+      // Fallback para navegadores sin clipboard API
+      const ta = document.createElement('textarea');
+      ta.value = cmds; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+    });
+  }
+
+</script>
+</body>
+</html>
