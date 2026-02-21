@@ -6,297 +6,575 @@
   <title>Transcriptotem</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
+    /* ══════════════════════════════════════════════════════
+       FROST — Dark glassmorphism · Ice blue · macOS-inspired
+    ══════════════════════════════════════════════════════ */
     :root {
-      --bg:       #0f1117;
-      --card:     #161b22;
-      --hover:    #1c2128;
-      --blue:     #58a6ff;
-      --mint:     #3fb950;
-      --orange:   #f0883e;
-      --red:      #f85149;
-      --text:     #e6edf3;
-      --sub:      #8b949e;
-      --muted:    #6e7681;
-      --border:   #30363d;
-      --r:        8px;
-      --rl:       12px;
+      /* ── Nueva paleta Carbón + Teal ── */
+      --bg-deep:    #121417;
+      --bg-mid:     #1a2026;
+      --bg-glass:   rgba(255,255,255,0.04);
+      --bg-glass-h: rgba(255,255,255,0.07);
+
+      /* Teal accent system */
+      --ice:        #2d7d7d;
+      --ice-bright: #3da0a0;
+      --ice-glow:   rgba(45,125,125,0.2);
+      --ice-border: rgba(45,125,125,0.3);
+      --ice-deep:   rgba(45,125,125,0.1);
+
+      /* Status colors */
+      --ok:         #4ade80;
+      --ok-glow:    rgba(74,222,128,0.2);
+      --warn:       #fbbf24;
+      --err:        #f87171;
+
+      /* Typography */
+      --text:       #e0e0e0;
+      --text-sub:   rgba(224,224,224,0.65);
+      --text-muted: rgba(224,224,224,0.35);
+
+      /* Structure */
+      --border:     rgba(45,125,125,0.18);
+      --border-h:   rgba(45,125,125,0.35);
+      --r:          10px;
+      --rl:         16px;
+      --rx:         22px;
     }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.6; }
 
-    /* ── HEADER ── */
-    header {
-      background: var(--card); border-bottom: 1px solid var(--border);
-      padding: 0 1.5rem; height: 58px;
-      display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
-      position: sticky; top: 0; z-index: 100;
+    body {
+      font-family: 'Syne', -apple-system, sans-serif;
+      background: var(--bg-deep);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+      overflow-x: hidden;
     }
-    .logo { font-size: 1.15rem; font-weight: 700; letter-spacing: -0.02em; flex-shrink: 0; }
-    .logo span { color: var(--mint); }
 
-    /* Server status pill */
+    /* Ambient background glow */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 80% 50% at 20% 10%, rgba(45,125,125,0.07) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(45,125,125,0.05) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 60% at 50% 50%, rgba(26,32,38,0.8) 0%, transparent 70%);
+    }
+
+    /* ── HEADER ────────────────────────────────────────── */
+    header {
+      height: 62px; padding: 0 1.75rem;
+      display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
+      position: sticky; top: 0; z-index: 200;
+      background: rgba(18,20,23,0.85);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo-wrap { display: flex; flex-direction: column; gap: 0.1rem; flex-shrink: 0; }
+    .logo {
+      font-size: 1.65rem; font-weight: 800;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #3da0a0 0%, #2d7d7d 60%, rgba(45,125,125,0.6) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.2;
+    }
+    .logo span { -webkit-text-fill-color: transparent; }
+    .logo-sub { font-size: 0.82rem; color: var(--text-muted); letter-spacing: 0.02em; font-weight: 400; }
+
+    /* Language switcher */
+    .lang-switch {
+      display: flex; align-items: center; gap: 0.25rem;
+      background: var(--bg-glass); border: 1px solid var(--border);
+      border-radius: 99px; padding: 3px; flex-shrink: 0;
+    }
+    .lang-btn {
+      padding: 0.22rem 0.65rem; border-radius: 99px; border: none;
+      font-family: 'Syne', sans-serif; font-size: 0.82rem; font-weight: 700;
+      cursor: pointer; transition: all 0.2s; letter-spacing: 0.04em;
+      background: transparent; color: var(--text-muted);
+    }
+    .lang-btn.active { background: var(--ice-deep); color: var(--ice); border: 1px solid var(--ice-border); }
+    .lang-btn:hover:not(.active) { color: var(--text-sub); }
+
+    /* Status pill */
     .srv-pill {
       display: flex; align-items: center; gap: 0.5rem;
-      padding: 0.3rem 0.9rem; border-radius: 99px;
-      border: 1px solid var(--border); background: var(--hover);
-      font-size: 0.75rem; color: var(--muted);
-      cursor: pointer; transition: all 0.2s; flex-shrink: 0;
-      user-select: none;
+      padding: 0.3rem 1rem; border-radius: 99px;
+      border: 1px solid var(--border);
+      background: var(--bg-glass);
+      backdrop-filter: blur(10px);
+      font-size: 0.82rem; font-weight: 500; letter-spacing: 0.02em;
+      color: var(--text-muted); cursor: pointer;
+      transition: all 0.25s; flex-shrink: 0;
     }
-    .srv-pill:hover { border-color: var(--blue); color: var(--text); }
-    .srv-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); transition: background 0.3s; flex-shrink: 0; }
-    .srv-dot.on  { background: var(--mint); box-shadow: 0 0 6px var(--mint); animation: blink 2s infinite; }
-    .srv-dot.mid { background: var(--orange); box-shadow: 0 0 6px var(--orange); animation: blink 0.7s infinite; }
-    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.35} }
+    .srv-pill:hover { border-color: var(--ice-border); color: var(--ice); background: var(--ice-deep); }
 
-    /* ── LAYOUT ── */
-    .shell { display: flex; min-height: calc(100vh - 58px); }
+    .srv-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--text-muted); transition: all 0.4s; flex-shrink: 0;
+    }
+    .srv-dot.on  { background: var(--ok); box-shadow: 0 0 8px var(--ok-glow); animation: pulse 2.5s infinite; }
+    .srv-dot.mid { background: var(--warn); box-shadow: 0 0 8px rgba(251,191,36,0.4); animation: pulse 0.8s infinite; }
 
-    /* ── SIDEBAR ── */
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.85)} }
+
+    /* ── LAYOUT ─────────────────────────────────────────── */
+    .shell { display: flex; min-height: calc(100vh - 62px); position: relative; z-index: 1; }
+
+    /* ── SIDEBAR ─────────────────────────────────────────── */
     .sidebar {
-      width: 210px; min-width: 210px; background: var(--card);
+      width: 220px; min-width: 220px;
+      background: rgba(18,20,23,0.7);
+      backdrop-filter: blur(12px);
       border-right: 1px solid var(--border);
-      display: flex; flex-direction: column; transition: all 0.3s; overflow: hidden;
+      display: flex; flex-direction: column;
+      transition: width 0.3s ease, min-width 0.3s ease;
+      overflow: hidden;
     }
-    .sidebar.collapsed { width: 40px; min-width: 40px; }
+    .sidebar.collapsed { width: 44px; min-width: 44px; }
+
     .sidebar-header {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 0.8rem 0.9rem; border-bottom: 1px solid var(--border);
+      padding: 0.85rem 1rem; border-bottom: 1px solid var(--border);
     }
-    .sidebar-title { font-size: 0.78rem; font-weight: 600; white-space: nowrap; }
+    .sidebar-title {
+      font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--ice); white-space: nowrap;
+    }
     .sidebar.collapsed .sidebar-title,
     .sidebar.collapsed .sidebar-sub,
     .sidebar.collapsed .hist-list,
     .sidebar.collapsed .hist-empty { display: none; }
+
     .sidebar-toggle {
-      background: none; border: 1px solid var(--border); color: var(--muted);
-      cursor: pointer; border-radius: 5px; padding: 0.1rem 0.35rem; font-size: 0.78rem;
-      transition: all 0.2s; flex-shrink: 0;
+      background: var(--bg-glass); border: 1px solid var(--border);
+      color: var(--text-muted); cursor: pointer;
+      border-radius: 6px; padding: 0.15rem 0.4rem;
+      font-size: 0.85rem; transition: all 0.2s; flex-shrink: 0;
     }
-    .sidebar-toggle:hover { border-color: var(--blue); color: var(--text); }
-    .sidebar-sub { padding: 0.5rem 0.9rem; font-size: 0.7rem; color: var(--muted); line-height: 1.4; }
-    .hist-empty { padding: 0.9rem; font-size: 0.75rem; color: var(--muted); }
-    .hist-list { list-style: none; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 0.3rem; padding: 0.4rem; }
-    .hist-item { background: var(--hover); border: 1px solid var(--border); border-radius: var(--r); padding: 0.55rem 0.7rem; }
-    .hist-top { display: flex; justify-content: space-between; gap: 0.4rem; margin-bottom: 0.35rem; }
-    .hist-name { font-size: 0.75rem; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .hist-time { font-size: 0.68rem; color: var(--muted); white-space: nowrap; }
+    .sidebar-toggle:hover { border-color: var(--ice-border); color: var(--ice); }
+
+    .sidebar-sub {
+      padding: 0.6rem 1rem; font-size: 0.79rem;
+      color: var(--text-muted); line-height: 1.5;
+    }
+    .hist-empty { padding: 1rem; font-size: 0.84rem; color: var(--text-muted); }
+
+    .hist-list {
+      list-style: none; flex: 1; overflow-y: auto;
+      display: flex; flex-direction: column; gap: 0.35rem; padding: 0.5rem;
+    }
+    .hist-list::-webkit-scrollbar { width: 3px; }
+    .hist-list::-webkit-scrollbar-track { background: transparent; }
+    .hist-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+    .hist-item {
+      background: var(--bg-glass); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 0.6rem 0.75rem;
+      transition: all 0.2s;
+    }
+    .hist-item:hover { border-color: var(--ice-border); background: var(--ice-deep); }
+    .hist-top { display: flex; justify-content: space-between; gap: 0.4rem; margin-bottom: 0.4rem; }
+    .hist-name { font-size: 0.83rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); }
+    .hist-time { font-size: 0.76rem; color: var(--text-muted); white-space: nowrap; }
     .hist-actions { display: flex; gap: 0.3rem; }
+
     .mini-btn {
-      font-size: 0.68rem; padding: 0.18rem 0.45rem;
-      background: var(--card); border: 1px solid var(--border);
-      color: var(--sub); border-radius: 4px; cursor: pointer; transition: all 0.15s;
+      font-size: 0.76rem; padding: 0.18rem 0.48rem;
+      background: var(--bg-glass); border: 1px solid var(--border);
+      color: var(--text-muted); border-radius: 5px;
+      cursor: pointer; transition: all 0.15s; font-family: inherit;
     }
-    .mini-btn:hover { border-color: var(--blue); color: var(--blue); }
+    .mini-btn:hover { border-color: var(--ice-border); color: var(--ice); }
 
-    /* ── CONTENT ── */
+    /* ── CONTENT ─────────────────────────────────────────── */
     .content { flex: 1; overflow-y: auto; }
-    main { max-width: 860px; margin: 0 auto; padding: 1.5rem; }
+    main { max-width: 820px; margin: 0 auto; padding: 1.75rem 1.5rem; }
 
-    /* ── TABS ── */
-    .tabs { display: flex; gap: 0.2rem; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; }
-    .tab-btn {
-      background: none; border: none; border-bottom: 2px solid transparent;
-      color: var(--muted); cursor: pointer; padding: 0.55rem 1rem;
-      font-size: 0.86rem; font-weight: 500; font-family: inherit;
-      transition: all 0.2s; margin-bottom: -1px;
+    /* ── TABS ────────────────────────────────────────────── */
+    .tabs {
+      display: flex; gap: 0; margin-bottom: 1.75rem;
+      border-bottom: 1px solid var(--border);
     }
-    .tab-btn:hover { color: var(--text); }
-    .tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); }
+    .tab-btn {
+      background: none; border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-muted); cursor: pointer;
+      padding: 0.6rem 1.1rem; margin-bottom: -1px;
+      font-size: 0.92rem; font-weight: 600;
+      font-family: 'Syne', sans-serif;
+      letter-spacing: 0.02em;
+      transition: all 0.2s;
+    }
+    .tab-btn:hover { color: var(--text-sub); }
+    .tab-btn.active { color: var(--ice); border-bottom-color: var(--ice); }
     .tab-panel { display: none; }
     .tab-panel.active { display: block; }
 
-    /* ── SERVER PANEL ── */
-    .srv-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--rl); overflow: hidden; margin-bottom: 1.25rem; }
-    .srv-hero { padding: 1.75rem 2rem; display: flex; align-items: center; gap: 1.75rem; flex-wrap: wrap; border-bottom: 1px solid var(--border); }
-    .srv-icon { font-size: 2.75rem; flex-shrink: 0; }
-    .srv-info { flex: 1; min-width: 180px; }
-    .srv-info h2 { font-size: 1.05rem; font-weight: 600; margin-bottom: 0.25rem; }
-    .srv-info p { font-size: 0.81rem; color: var(--muted); line-height: 1.5; }
-    .btn-srv {
-      padding: 0.7rem 1.75rem; border-radius: 9px; border: none;
-      font-size: 0.88rem; font-weight: 700; font-family: inherit;
-      cursor: pointer; transition: all 0.2s; white-space: nowrap; flex-shrink: 0;
+    /* ── GLASS CARD ──────────────────────────────────────── */
+    .card {
+      background: var(--bg-glass);
+      border: 1px solid var(--border);
+      border-radius: var(--rl);
+      backdrop-filter: blur(10px);
+      overflow: hidden;
+      margin-bottom: 1.25rem;
+      transition: border-color 0.3s;
     }
-    .btn-srv.start { background: var(--mint); color: #0d1117; }
-    .btn-srv.start:hover { filter: brightness(1.1); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(63,185,80,0.3); }
-    .btn-srv.stop { background: transparent; color: var(--red); border: 1px solid var(--red); }
-    .btn-srv.stop:hover { background: rgba(248,81,73,0.1); }
-    .btn-srv:disabled { opacity: 0.45; cursor: not-allowed; transform: none !important; }
-    .chips-row { padding: 0.8rem 2rem; display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
-    .chip {
-      display: flex; align-items: center; gap: 0.35rem;
-      font-size: 0.75rem; padding: 0.22rem 0.6rem;
-      border-radius: 99px; border: 1px solid var(--border);
-      background: var(--hover); color: var(--muted);
-    }
-    .chip-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); }
-    .chip.ok  { color: var(--mint); border-color: rgba(63,185,80,0.3); background: rgba(63,185,80,0.08); }
-    .chip.ok .chip-dot { background: var(--mint); }
-    .chip.mid { color: var(--orange); border-color: rgba(240,136,62,0.3); background: rgba(240,136,62,0.08); }
-    .chip.mid .chip-dot { background: var(--orange); animation: blink 1s infinite; }
-    .srv-log {
-      font-family: 'JetBrains Mono', monospace; font-size: 0.73rem;
-      color: var(--muted); padding: 0.8rem 1.5rem;
-      border-top: 1px solid var(--border); min-height: 2.8rem;
-      line-height: 1.6; background: rgba(0,0,0,0.18);
+    .card:hover { border-color: var(--ice-border); }
+
+    /* ── SERVER PANEL ────────────────────────────────────── */
+    .srv-hero {
+      padding: 2rem; display: flex; align-items: center;
+      gap: 1.75rem; flex-wrap: wrap;
+      border-bottom: 1px solid var(--border);
     }
 
-    /* ── TRANSCRIPTION PANEL ── */
+    .srv-icon-wrap {
+      width: 64px; height: 64px; border-radius: var(--rl);
+      background: var(--ice-deep); border: 1px solid var(--ice-border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.1rem; flex-shrink: 0;
+      box-shadow: 0 0 30px var(--ice-glow);
+    }
+
+    .srv-info { flex: 1; min-width: 180px; }
+    .srv-info h2 {
+      font-size: 1.15rem; font-weight: 700;
+      margin-bottom: 0.3rem; color: var(--text);
+    }
+    .srv-info p { font-size: 0.9rem; color: var(--text-sub); line-height: 1.6; }
+
+    /* Primary action button */
+    .btn-srv {
+      padding: 0.7rem 1.8rem; border-radius: var(--r);
+      border: none; font-size: 0.96rem; font-weight: 700;
+      font-family: 'Syne', sans-serif; letter-spacing: 0.03em;
+      cursor: pointer; transition: all 0.25s; flex-shrink: 0;
+    }
+    .btn-srv.start {
+      background: linear-gradient(135deg, #2d7d7d 0%, #3da0a0 100%);
+      color: #060a10;
+      box-shadow: 0 0 20px rgba(168,216,240,0.25);
+    }
+    .btn-srv.start:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 24px rgba(168,216,240,0.4);
+      filter: brightness(1.08);
+    }
+    .btn-srv.stop {
+      background: transparent; color: var(--err);
+      border: 1px solid rgba(248,113,113,0.35);
+    }
+    .btn-srv.stop:hover { background: rgba(248,113,113,0.08); }
+    .btn-srv:disabled { opacity: 0.38; cursor: not-allowed; transform: none !important; }
+
+    /* Chips */
+    .chips-row {
+      padding: 0.85rem 2rem; display: flex; gap: 0.55rem; flex-wrap: wrap;
+    }
+    .chip {
+      display: flex; align-items: center; gap: 0.35rem;
+      font-size: 0.81rem; font-weight: 500;
+      padding: 0.22rem 0.65rem; border-radius: 99px;
+      border: 1px solid var(--border); background: var(--bg-glass);
+      color: var(--text-muted);
+    }
+    .chip-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--text-muted); flex-shrink: 0; }
+    .chip.ok  { color: var(--ok); border-color: rgba(74,222,128,0.25); background: rgba(74,222,128,0.06); }
+    .chip.ok .chip-dot { background: var(--ok); box-shadow: 0 0 4px var(--ok-glow); }
+    .chip.mid { color: var(--warn); border-color: rgba(251,191,36,0.25); background: rgba(251,191,36,0.06); }
+    .chip.mid .chip-dot { background: var(--warn); animation: pulse 1s infinite; }
+
+    /* Log */
+    .srv-log {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.82rem;
+      color: var(--text-muted); padding: 0.85rem 1.5rem;
+      border-top: 1px solid var(--border); min-height: 3rem;
+      line-height: 1.7; background: rgba(0,0,0,0.2);
+    }
+
+    /* Code block */
+    .code-block {
+      position: relative; margin: 0.5rem 0;
+    }
+    .code-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.84rem; color: var(--ice);
+      background: rgba(0,0,0,0.35); border: 1px solid var(--ice-border);
+      border-radius: var(--r); padding: 0.7rem 3rem 0.7rem 0.9rem;
+      white-space: pre-wrap; word-break: break-all; line-height: 1.8; margin: 0;
+    }
+    .btn-copy {
+      position: absolute; top: 0.4rem; right: 0.4rem;
+      background: var(--bg-glass); border: 1px solid var(--border);
+      color: var(--text-muted); border-radius: 6px;
+      padding: 0.18rem 0.5rem; font-size: 0.78rem;
+      cursor: pointer; transition: all 0.2s; font-family: inherit;
+    }
+    .btn-copy:hover { border-color: var(--ice-border); color: var(--ice); }
+
+    /* ── TRANSCRIPTION PANEL ─────────────────────────────── */
     /* Mode selector */
     .mode-selector {
       display: flex; gap: 0; margin-bottom: 1.25rem;
-      background: var(--hover); border: 1px solid var(--border);
+      background: var(--bg-glass); border: 1px solid var(--border);
       border-radius: var(--r); padding: 4px; width: fit-content;
+      backdrop-filter: blur(10px);
     }
     .mode-opt {
-      padding: 0.45rem 1.25rem; border-radius: 6px; border: none;
-      font-family: inherit; font-size: 0.84rem; font-weight: 500;
+      padding: 0.42rem 1.1rem; border-radius: 7px; border: none;
+      font-family: 'Syne', sans-serif; font-size: 0.9rem; font-weight: 600;
       cursor: pointer; transition: all 0.2s;
-      background: transparent; color: var(--muted);
+      background: transparent; color: var(--text-muted);
+      letter-spacing: 0.02em;
     }
-    .mode-opt:hover:not(.active) { color: var(--sub); }
-    .mode-opt.active { background: var(--card); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+    .mode-opt:hover:not(.active) { color: var(--text-sub); }
+    .mode-opt.active {
+      background: var(--ice-deep); color: var(--ice);
+      border: 1px solid var(--ice-border);
+      box-shadow: 0 0 12px rgba(168,216,240,0.1);
+    }
 
     /* Drop zone */
     .drop-zone {
-      border: 2px dashed var(--border); border-radius: var(--rl);
-      padding: 1.75rem; text-align: center; cursor: pointer;
-      transition: all 0.2s; margin-bottom: 1rem;
+      border: 1.5px dashed var(--border); border-radius: var(--rl);
+      padding: 2rem; text-align: center; cursor: pointer;
+      transition: all 0.25s; margin-bottom: 1rem;
+      background: var(--bg-glass);
+      position: relative; overflow: hidden;
     }
-    .drop-zone:hover, .drop-zone.over { border-color: var(--blue); background: rgba(88,166,255,0.04); }
-    .dz-icon { font-size: 2.25rem; margin-bottom: 0.6rem; }
-    .dz-text { font-size: 0.88rem; color: var(--sub); line-height: 1.6; }
-    .dz-text strong { color: var(--text); }
-    .dz-hint { font-size: 0.78rem; color: var(--muted); margin-top: 0.35rem; }
+    .drop-zone::before {
+      content: '';
+      position: absolute; inset: 0; opacity: 0;
+      background: radial-gradient(ellipse at center, var(--ice-glow) 0%, transparent 70%);
+      transition: opacity 0.3s;
+    }
+    .drop-zone:hover::before, .drop-zone.over::before { opacity: 1; }
+    .drop-zone:hover, .drop-zone.over {
+      border-color: var(--ice-border);
+      box-shadow: 0 0 30px rgba(168,216,240,0.08);
+    }
+
+    .dz-icon { font-size: 2.6rem; margin-bottom: 0.7rem; display: block; position: relative; }
+    .dz-text { font-size: 0.98rem; color: var(--text-sub); line-height: 1.6; position: relative; }
+    .dz-text strong { color: var(--text); font-weight: 700; }
+    .dz-hint { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.4rem; position: relative; }
+
     .btn-pick {
       display: inline-flex; align-items: center; gap: 0.4rem;
-      margin-top: 0.7rem; padding: 0.45rem 1.1rem;
-      background: var(--hover); border: 1px solid var(--border);
-      color: var(--text); border-radius: var(--r);
-      font-size: 0.84rem; font-family: inherit; cursor: pointer; transition: all 0.2s;
+      margin-top: 0.85rem; padding: 0.45rem 1.15rem;
+      background: var(--ice-deep); border: 1px solid var(--ice-border);
+      color: var(--ice); border-radius: var(--r);
+      font-size: 0.92rem; font-family: 'Syne', sans-serif; font-weight: 600;
+      cursor: pointer; transition: all 0.2s; position: relative;
     }
-    .btn-pick:hover { border-color: var(--blue); color: var(--blue); }
+    .btn-pick:hover { background: rgba(168,216,240,0.15); box-shadow: 0 0 16px rgba(168,216,240,0.15); }
     input[type="file"] { display: none; }
 
-    /* Folder mode panel */
+    /* Folder panel */
     .folder-panel {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: var(--rl); padding: 1.5rem;
-      margin-bottom: 1rem;
+      background: var(--bg-glass); border: 1px solid var(--border);
+      border-radius: var(--rl); padding: 1.5rem; margin-bottom: 1rem;
+      backdrop-filter: blur(10px);
     }
-    .folder-panel h3 { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.3rem; }
-    .folder-panel p { font-size: 0.8rem; color: var(--muted); line-height: 1.6; margin-bottom: 1rem; }
+    .folder-panel h3 {
+      font-size: 1.0rem; font-weight: 700; margin-bottom: 0.3rem;
+      color: var(--text);
+    }
+    .folder-panel p { font-size: 0.89rem; color: var(--text-sub); line-height: 1.6; margin-bottom: 1rem; }
+
     .folder-row {
       display: flex; align-items: center; gap: 0.85rem;
-      background: var(--hover); border: 1px solid var(--border);
-      border-radius: var(--r); padding: 0.75rem 1rem; margin-bottom: 0.6rem;
+      background: rgba(0,0,0,0.2); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 0.7rem 1rem; margin-bottom: 0.5rem;
+      transition: border-color 0.2s;
     }
+    .folder-row:hover { border-color: var(--ice-border); }
     .folder-ico { font-size: 1.3rem; flex-shrink: 0; }
     .folder-info { flex: 1; min-width: 0; }
-    .folder-lbl { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
-    .folder-path { font-size: 0.78rem; font-family: 'JetBrains Mono', monospace; color: var(--blue); word-break: break-all; margin-top: 0.15rem; }
-    .btn-folder-scan {
-      width: 100%; padding: 0.7rem; margin-top: 0.5rem;
-      background: var(--blue); color: #0d1117;
-      border: none; border-radius: var(--r);
-      font-size: 0.9rem; font-weight: 700; font-family: inherit;
-      cursor: pointer; transition: all 0.2s;
+    .folder-lbl { font-size: 0.77rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.07em; font-weight: 600; }
+    .folder-path {
+      font-size: 0.85rem; font-family: 'JetBrains Mono', monospace;
+      color: var(--ice); word-break: break-all; margin-top: 0.15rem;
     }
-    .btn-folder-scan:hover:not(:disabled) { filter: brightness(1.1); }
-    .btn-folder-scan:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .btn-folder-scan {
+      width: 100%; margin-top: 0.75rem; padding: 0.75rem;
+      background: linear-gradient(135deg, #2d7d7d 0%, #3da0a0 100%);
+      color: #060a10; border: none; border-radius: var(--r);
+      font-size: 0.98rem; font-weight: 700; font-family: 'Syne', sans-serif;
+      letter-spacing: 0.03em; cursor: pointer; transition: all 0.25s;
+    }
+    .btn-folder-scan:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 20px rgba(168,216,240,0.3);
+    }
+    .btn-folder-scan:disabled { opacity: 0.38; cursor: not-allowed; transform: none; }
 
     /* Controls */
     .controls { display: flex; flex-wrap: wrap; gap: 0.85rem; margin-bottom: 1rem; }
-    .ctrl { display: flex; flex-direction: column; gap: 0.35rem; flex: 1; min-width: 160px; }
-    label { font-size: 0.75rem; font-weight: 500; color: var(--sub); }
+    .ctrl { display: flex; flex-direction: column; gap: 0.38rem; flex: 1; min-width: 160px; }
+
+    label {
+      font-size: 0.8rem; font-weight: 700; letter-spacing: 0.06em;
+      text-transform: uppercase; color: #3da0a0;
+    }
+
     select, textarea {
-      background: var(--card); border: 1px solid var(--border);
+      background: var(--bg-glass); border: 1px solid var(--border);
       color: var(--text); border-radius: var(--r);
-      font-family: inherit; font-size: 0.86rem;
-      padding: 0.45rem 0.7rem; outline: none; transition: border-color 0.2s; appearance: none;
+      font-family: 'Syne', sans-serif; font-size: 0.94rem;
+      padding: 0.48rem 0.75rem; outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      backdrop-filter: blur(8px);
+      appearance: none;
     }
     select {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236e7681' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-      background-repeat: no-repeat; background-position: right 0.7rem center;
-      padding-right: 1.8rem; cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a8d8f0' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 0.75rem center;
+      padding-right: 2rem; cursor: pointer;
     }
-    select:focus, textarea:focus { border-color: var(--blue); }
-    textarea { resize: vertical; min-height: 62px; line-height: 1.5; font-size: 0.8rem; }
+    select:focus, textarea:focus {
+      border-color: var(--ice-border);
+      box-shadow: 0 0 0 3px rgba(168,216,240,0.08);
+    }
+    textarea { resize: vertical; min-height: 66px; line-height: 1.5; font-size: 0.89rem; font-family: 'Syne', sans-serif; }
 
-    /* Process button */
+    /* Process buttons */
     #procesar-section { display: none; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 1rem; }
     .btn-proc {
       display: inline-flex; align-items: center; gap: 0.4rem;
-      padding: 0.5rem 1.2rem; background: var(--hover);
-      border: 1px solid var(--border); color: var(--text);
-      border-radius: var(--r); font-size: 0.86rem; font-family: inherit;
-      cursor: pointer; transition: all 0.2s;
+      padding: 0.48rem 1.15rem;
+      background: var(--ice-deep); border: 1px solid var(--ice-border);
+      color: var(--ice); border-radius: var(--r);
+      font-size: 0.94rem; font-weight: 600; font-family: 'Syne', sans-serif;
+      cursor: pointer; transition: all 0.2s; letter-spacing: 0.02em;
     }
-    .btn-proc:hover { border-color: var(--blue); color: var(--blue); }
-    .btn-proc.danger { color: var(--red); border-color: rgba(248,81,73,0.3); }
-    .btn-proc.danger:hover { background: rgba(248,81,73,0.1); }
-    .btn-proc:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-proc:hover { background: rgba(168,216,240,0.15); box-shadow: 0 0 16px rgba(168,216,240,0.15); }
+    .btn-proc.danger { color: var(--err); border-color: rgba(248,113,113,0.3); background: transparent; }
+    .btn-proc.danger:hover { background: rgba(248,113,113,0.08); }
+    .btn-proc:disabled { opacity: 0.35; cursor: not-allowed; }
 
     /* Progress */
     .prog-section { margin-bottom: 1rem; }
-    .prog-track { background: var(--hover); border-radius: 99px; height: 4px; overflow: hidden; margin-bottom: 0.45rem; }
-    .prog-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--blue), var(--mint)); border-radius: 99px; transition: width 0.4s ease; }
-    .prog-status { font-size: 0.81rem; color: var(--sub); }
-    .prog-eta { font-size: 0.73rem; color: var(--muted); margin-top: 0.2rem; font-family: 'JetBrains Mono', monospace; }
+    .prog-track {
+      background: rgba(168,216,240,0.06); border-radius: 99px;
+      height: 3px; overflow: hidden; margin-bottom: 0.5rem;
+      border: 1px solid var(--border);
+    }
+    .prog-fill {
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, #2d7d7d, #3da0a0);
+      border-radius: 99px; transition: width 0.5s ease;
+      box-shadow: 0 0 8px rgba(168,216,240,0.5);
+    }
+    .prog-status { font-size: 0.9rem; color: var(--text-sub); font-weight: 500; }
+    .prog-eta { font-size: 0.81rem; color: var(--text-muted); margin-top: 0.2rem; font-family: 'JetBrains Mono', monospace; }
 
     /* Queue */
     .queue-wrap { margin-bottom: 1rem; }
     .queue-list { list-style: none; display: flex; flex-direction: column; gap: 0.3rem; }
     .q-item {
       display: flex; align-items: center; gap: 0.65rem;
-      padding: 0.45rem 0.7rem; background: var(--card);
-      border: 1px solid var(--border); border-radius: var(--r); font-size: 0.85rem;
+      padding: 0.48rem 0.75rem;
+      background: var(--bg-glass); border: 1px solid var(--border);
+      border-radius: var(--r); font-size: 0.93rem;
+      transition: border-color 0.2s;
     }
-    .badge { font-size: 0.69rem; padding: 0.15rem 0.45rem; border-radius: 4px; font-weight: 500; white-space: nowrap; }
-    .b-pending  { background: rgba(139,148,158,0.15); color: var(--muted); }
-    .b-working  { background: rgba(88,166,255,0.15);  color: var(--blue); }
-    .b-done     { background: rgba(63,185,80,0.15);   color: var(--mint); }
-    .b-error    { background: rgba(248,81,73,0.15);   color: var(--red); }
+    .q-item:hover { border-color: var(--ice-border); }
+
+    .badge { font-size: 0.77rem; padding: 0.15rem 0.5rem; border-radius: 4px; font-weight: 700; white-space: nowrap; letter-spacing: 0.04em; }
+    .b-pending { background: rgba(168,200,230,0.08); color: var(--text-muted); }
+    .b-working { background: rgba(168,216,240,0.12); color: var(--ice); }
+    .b-done    { background: rgba(74,222,128,0.1);   color: var(--ok); }
+    .b-error   { background: rgba(248,113,113,0.1);  color: var(--err); }
+
     .q-remove {
       margin-left: auto; background: none; border: none;
-      color: var(--muted); cursor: pointer; font-size: 0.88rem;
+      color: var(--text-muted); cursor: pointer; font-size: 0.95rem;
       padding: 0 0.2rem; border-radius: 3px; transition: color 0.15s;
     }
-    .q-remove:hover { color: var(--red); }
+    .q-remove:hover { color: var(--err); }
 
     /* Transcript */
     .transcript-wrap { margin-bottom: 1rem; }
     .transcript {
-      width: 100%; min-height: 200px; background: var(--card);
-      border: 1px solid var(--border); border-radius: var(--r);
-      color: var(--text); font-family: inherit; font-size: 0.86rem;
-      padding: 0.75rem; line-height: 1.75; resize: vertical; outline: none;
+      width: 100%; min-height: 200px;
+      background: rgba(0,0,0,0.25); border: 1px solid var(--border);
+      border-radius: var(--r); color: var(--text);
+      font-family: 'Syne', sans-serif; font-size: 0.95rem;
+      padding: 0.85rem; line-height: 1.8; resize: vertical; outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .transcript:focus {
+      border-color: var(--ice-border);
+      box-shadow: 0 0 0 3px rgba(168,216,240,0.06);
     }
 
     /* Export */
     .export-row { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-bottom: 1rem; }
     .btn-exp {
-      padding: 0.42rem 0.9rem; background: var(--hover);
-      border: 1px solid var(--border); color: var(--text);
-      border-radius: var(--r); font-size: 0.8rem; font-family: inherit;
-      cursor: pointer; transition: all 0.15s;
+      padding: 0.4rem 0.9rem; background: var(--bg-glass);
+      border: 1px solid var(--border); color: var(--text-muted);
+      border-radius: var(--r); font-size: 0.88rem; font-weight: 600;
+      font-family: 'Syne', sans-serif; cursor: pointer; transition: all 0.2s;
     }
-    .btn-exp:hover:not(:disabled) { border-color: var(--mint); color: var(--mint); }
-    .btn-exp:disabled { opacity: 0.38; cursor: not-allowed; }
+    .btn-exp:hover:not(:disabled) { border-color: var(--ice-border); color: var(--ice); background: var(--ice-deep); }
+    .btn-exp:disabled { opacity: 0.3; cursor: not-allowed; }
 
     /* Info boxes */
-    .info { background: rgba(88,166,255,0.06); border: 1px solid rgba(88,166,255,0.2); border-radius: var(--r); padding: 0.8rem 1rem; font-size: 0.8rem; color: var(--sub); line-height: 1.7; margin-bottom: 1rem; }
-    .info strong { color: var(--blue); }
-    .info.warn { border-color: rgba(240,136,62,0.35); background: rgba(240,136,62,0.06); }
-    .info.warn strong { color: var(--orange); }
+    .info {
+      background: rgba(168,216,240,0.04); border: 1px solid var(--ice-border);
+      border-radius: var(--r); padding: 0.9rem 1.1rem;
+      font-size: 0.89rem; color: var(--text-sub); line-height: 1.75;
+      margin-bottom: 1rem;
+    }
+    .info strong { color: var(--ice); font-weight: 700; }
+    .info.warn { border-color: rgba(251,191,36,0.25); background: rgba(251,191,36,0.04); }
+    .info.warn strong { color: var(--warn); }
 
-    @media (max-width: 600px) {
+    /* Section label */
+    .section-label {
+      font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--text-muted);
+      display: block; margin-bottom: 0.45rem;
+    }
+
+    /* Divider */
+    .divider { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
+
+    @media (max-width: 800px) {
+      .sidebar { width: 180px; min-width: 180px; }
+    }
+    @media (max-width: 640px) {
       .sidebar { display: none; }
-      .srv-hero { flex-direction: column; }
+      .srv-hero { flex-direction: column; align-items: flex-start; }
       .btn-srv { width: 100%; text-align: center; }
+      header { padding: 0 1rem; gap: 0.75rem; }
+      .logo-sub { display: none; }
+      main { padding: 1rem; }
+      .controls { flex-direction: column; }
+      .ctrl { min-width: 100%; }
+      .chips-row { padding: 0.7rem 1rem; }
+      .tabs { gap: 0; overflow-x: auto; }
+      .tab-btn { padding: 0.55rem 0.7rem; font-size: 0.78rem; white-space: nowrap; }
+      .export-row { gap: 0.35rem; }
+      .btn-exp { font-size: 0.74rem; padding: 0.35rem 0.7rem; }
+      .folder-panel { padding: 1rem; }
+      .mode-selector { width: 100%; }
+      .mode-opt { flex: 1; text-align: center; }
+    }
+    @media (max-width: 400px) {
+      .logo { font-size: 1rem; }
+      .lang-switch { display: none; }
     }
   </style>
 </head>
@@ -304,7 +582,14 @@
 
 <!-- ══ HEADER ══════════════════════════════════════════════════ -->
 <header>
-  <div class="logo">Transcripto<span>tem</span></div>
+  <div class="logo-wrap">
+    <div class="logo">🎙️ Transcripto<span>tem</span></div>
+    <div class="logo-sub">Desarrollado por <a href="https://github.com/rodrigomunozcha/transcriptotem" target="_blank" style="color:var(--ice);text-decoration:none;">github.com/rodrigomunozcha</a></div>
+  </div>
+  <div class="lang-switch">
+    <button class="lang-btn active" id="lang-es" onclick="setLang('es')">ES</button>
+    <button class="lang-btn" id="lang-en" onclick="setLang('en')">EN</button>
+  </div>
   <div class="srv-pill" onclick="document.querySelector('[data-tab=servidor]').click()">
     <div class="srv-dot" id="hdr-dot"></div>
     <span id="hdr-txt">Servidor apagado</span>
@@ -319,7 +604,7 @@
       <div class="sidebar-title">Historial</div>
       <button class="sidebar-toggle" id="btn-collapse">⟨</button>
     </div>
-    <div class="sidebar-sub">Sesión actual. Cierra la app para limpiar.</div>
+    <div class="sidebar-sub">Sesión actual.</div>
     <div class="hist-empty" id="hist-empty">Aún no hay transcripciones.</div>
     <ul class="hist-list" id="hist-list" style="display:none;"></ul>
   </aside>
@@ -329,19 +614,20 @@
     <main>
 
       <div class="tabs">
-        <button class="tab-btn" data-tab="servidor">⚙️ Servidor</button>
+        <button class="tab-btn" data-tab="servidor">⚙ Servidor</button>
         <button class="tab-btn active" data-tab="transcribir">🎙 Transcribir</button>
+        <button class="tab-btn" data-tab="carpeta">☁️ Carpeta en la nube</button>
       </div>
 
       <!-- ── SERVIDOR ─────────────────────────────────────── -->
       <div id="panel-servidor" class="tab-panel">
 
-        <div class="srv-card">
+        <div class="card">
           <div class="srv-hero">
-            <div class="srv-icon" id="srv-icon">🖥️</div>
+            <div class="srv-icon-wrap" id="srv-icon">🖥️</div>
             <div class="srv-info">
               <h2 id="srv-title">Servidor apagado</h2>
-              <p id="srv-desc">El servidor procesa el audio con Whisper en tu M3. Inícialo antes de transcribir. Cuando termines, apágalo — el Mac queda completamente libre.</p>
+              <p id="srv-desc">El servidor procesa el audio con Whisper en tu M3. Inícialo antes de transcribir. Al apagarlo, el Mac queda 100% libre.</p>
             </div>
             <button class="btn-srv start" id="btn-srv" onclick="toggleServidor()">▶ Iniciar</button>
           </div>
@@ -353,90 +639,46 @@
           <div class="srv-log" id="srv-log">Presiona Iniciar para comenzar.</div>
         </div>
 
-        <div class="info">
+        <div class="info" id="info-cycle">
           <strong>Ciclo de uso recomendado</strong><br>
           1. Presiona <strong>Iniciar</strong> — espera el indicador verde.<br>
           2. Ve a <strong>🎙 Transcribir</strong> — sube archivos o procesa la carpeta OneDrive.<br>
           3. Descarga tus .txt cuando termines.<br>
-          4. Presiona <strong>Apagar</strong> — el Mac queda 100% libre. No queda nada corriendo.
+          4. Presiona <strong>Apagar</strong> — el Mac queda 100% libre.
         </div>
 
-        <div class="info warn">
+        <div class="info warn" id="info-how">
           <strong>¿Cómo iniciar el servidor?</strong><br>
-          Abre Terminal, pega estos dos comandos y déjala minimizada:<br>
-          <div style="position:relative; margin-top:0.5rem;">
-            <pre id="cmd-block" style="font-family:'JetBrains Mono',monospace; font-size:0.76rem; color:var(--blue); background:rgba(0,0,0,0.25); border:1px solid var(--border); border-radius:6px; padding:0.65rem 3rem 0.65rem 0.85rem; line-height:1.9; white-space:pre-wrap; word-break:break-all; overflow-x:hidden; margin:0;">cd "/Users/TU_USUARIO/ruta/a/Transcriptotem_WebApp_BACKUP"
-source venv/bin/activate &amp;&amp; python3 main.py</pre>
-            <button onclick="copiarComandos()" title="Copiar comandos" style="position:absolute; top:0.45rem; right:0.45rem; background:var(--hover); border:1px solid var(--border); color:var(--sub); border-radius:5px; padding:0.2rem 0.5rem; font-size:0.72rem; cursor:pointer; transition:all 0.2s;" id="btn-copy-cmd">📋 Copiar</button>
+          Abre Terminal, pega estos comandos y déjala minimizada:<br>
+          <div class="code-block">
+            <pre id="cmd-block">cd "/Users/TU_USUARIO/ruta/a/Transcriptotem_WebApp_BACKUP"
+source venv/bin/activate && python3 main.py</pre>
+            <button class="btn-copy" id="btn-copy-cmd" onclick="copiarComandos()">📋 Copiar</button>
           </div>
-          La app detectará el servidor automáticamente en segundos.
+          La app detectará el servidor automáticamente.
         </div>
 
       </div>
 
       <!-- ── TRANSCRIBIR ────────────────────────────────────── -->
-      <div id="panel-transcribir" class="tab-panel active">
+      <div id="panel-transcribir" class="tab-panel active" >
 
-        <!-- Aviso servidor apagado -->
         <div class="info warn" id="aviso-srv" style="display:none;">
-          ⚠️ El servidor no está activo. Ve a <strong>⚙️ Servidor</strong> e inícialo primero.
-        </div>
-
-        <!-- Selector de modo -->
-        <div class="mode-selector">
-          <button class="mode-opt active" id="mode-manual" onclick="setMode('manual')">📂 Subir archivos</button>
-          <button class="mode-opt" id="mode-carpeta" onclick="setMode('carpeta')">📁 Procesar carpeta OneDrive</button>
+          ⚠️ El servidor no está activo. Ve a <strong>⚙ Servidor</strong> e inícialo primero.
         </div>
 
         <!-- ─ MODO MANUAL ─ -->
         <div id="panel-manual">
           <div class="drop-zone" id="drop-zone">
-            <div class="dz-icon">📁</div>
+            <span class="dz-icon">📁</span>
             <p class="dz-text"><strong>Arrastra aquí</strong> tus archivos de audio</p>
             <p class="dz-hint">.m4a · .mp3 · .wav — múltiples archivos aceptados</p>
             <button class="btn-pick" id="btn-pick">Seleccionar archivos</button>
           </div>
           <input type="file" id="file-input" accept=".m4a,.mp3,.wav" multiple>
-
-          <div id="procesar-section" style="display:none; gap:0.6rem; flex-wrap:wrap; margin-bottom:1rem; display:none;">
+          <div id="procesar-section" style="display:none;">
             <button class="btn-proc" id="btn-procesar">▶ Procesar todos</button>
             <button class="btn-proc danger" id="btn-detener" style="display:none;">⏹ Detener</button>
-          </div>
-        </div>
-
-        <!-- ─ MODO CARPETA ─ -->
-        <div id="panel-carpeta" style="display:none;">
-          <div class="folder-panel">
-            <h3>📁 Carpeta OneDrive — Pendientes</h3>
-            <p>El servidor leerá directamente los audios de tu carpeta <em>Pendientes</em>, los transcribirá y moverá a <em>Archivados</em>. Los .txt quedan en <em>Transcritas</em>.<br>No necesitas descargar nada ni hacer nada manual en el Mac.</p>
-
-            <div class="folder-row">
-              <div class="folder-ico">📥</div>
-              <div class="folder-info">
-                <div class="folder-lbl">Entrada — tus audios del Galaxy S22</div>
-                <div class="folder-path">~/OneDrive-Personal/3 Recursos/Grabaciones Clases/Pendientes</div>
-              </div>
-            </div>
-            <div class="folder-row">
-              <div class="folder-ico">📄</div>
-              <div class="folder-info">
-                <div class="folder-lbl">Salida — transcripciones .txt</div>
-                <div class="folder-path">~/OneDrive-Personal/3 Recursos/Grabaciones Clases/Transcritas</div>
-              </div>
-            </div>
-            <div class="folder-row">
-              <div class="folder-ico">📦</div>
-              <div class="folder-info">
-                <div class="folder-lbl">Archivados — audios procesados (no se reprocesarán)</div>
-                <div class="folder-path">~/OneDrive-Personal/3 Recursos/Grabaciones Clases/Archivados</div>
-              </div>
-            </div>
-
-            <div id="carpeta-status" style="display:none; margin-top:0.75rem; padding:0.65rem 0.9rem; background:var(--hover); border:1px solid var(--border); border-radius:var(--r); font-size:0.8rem; color:var(--sub);"></div>
-
-            <button class="btn-folder-scan" id="btn-scan" onclick="procesarCarpeta()">
-              ▶ Transcribir carpeta Pendientes
-            </button>
           </div>
         </div>
 
@@ -445,9 +687,9 @@ source venv/bin/activate &amp;&amp; python3 main.py</pre>
           <div class="ctrl" style="flex:1 1 240px;">
             <label for="ctx-preset">Preset por ramo</label>
             <select id="ctx-preset">
-              <option value="">(Selecciona para insertar contexto)</option>
+              <option value="" disabled>(Selecciona para insertar contexto)</option>
               <optgroup label="🎓 GENÉRICO">
-                <option data-prompt="Transcripción de clase universitaria en Chile. Transcribir únicamente la voz del profesor. Ignorar conversaciones de alumnos en el fondo.">Clase universitaria (genérico)</option>
+                <option data-prompt="Transcripción de clase universitaria en Chile. Transcribir únicamente la voz del profesor. Ignorar conversaciones de alumnos en el fondo." selected>Clase universitaria (genérico)</option>
               </optgroup>
               <optgroup label="📐 SEM 1">
                 <option data-prompt="Clase de fundamentos matemáticos. Términos: álgebra, ecuaciones, funciones, límites, derivadas, números reales, conjuntos.">Fundamentos Matemáticos</option>
@@ -503,7 +745,7 @@ source venv/bin/activate &amp;&amp; python3 main.py</pre>
             </select>
           </div>
           <div class="ctrl" style="flex:2 1 280px;">
-            <label for="ctx-text">Contexto del audio (editable)</label>
+            <label for="ctx-text">Contexto del audio</label>
             <textarea id="ctx-text" placeholder="(Opcional) Describe el audio para mejorar la precisión..."></textarea>
           </div>
         </div>
@@ -547,13 +789,13 @@ source venv/bin/activate &amp;&amp; python3 main.py</pre>
 
         <!-- Cola -->
         <div class="queue-wrap" id="queue-wrap" style="display:none;">
-          <label style="font-size:0.75rem; font-weight:500; color:var(--sub); display:block; margin-bottom:0.4rem;">Archivos en cola</label>
+          <span class="section-label">Archivos en cola</span>
           <ul class="queue-list" id="queue-list"></ul>
         </div>
 
         <!-- Transcripción -->
         <div class="transcript-wrap">
-          <label for="transcript" style="font-size:0.75rem; font-weight:500; color:var(--sub); display:block; margin-bottom:0.4rem;">Transcripción</label>
+          <span class="section-label">Transcripción</span>
           <textarea id="transcript" class="transcript" placeholder="El texto transcrito aparecerá aquí..." readonly></textarea>
         </div>
 
@@ -565,509 +807,442 @@ source venv/bin/activate &amp;&amp; python3 main.py</pre>
           <button class="btn-exp" id="btn-zip"  disabled>↓ ZIP todo</button>
         </div>
 
-      </div><!-- /panel-transcribir -->
+      </div>
+
+      <!-- ── CARPETA EN LA NUBE ─────────────────────────────── -->
+      <div id="panel-carpeta" class="tab-panel">
+        <div class="folder-panel">
+          <h3 id="t-folder-title">📁 Carpeta en la nube — Configuración</h3>
+          <p id="t-folder-desc">Define las carpetas donde están tus audios. El servidor las leerá directamente desde tu Mac.</p>
+
+          <!-- RUTA PENDIENTES -->
+          <div class="folder-row" id="row-pendientes">
+            <div class="folder-ico">📥</div>
+            <div class="folder-info" style="flex:1; min-width:0;">
+              <div class="folder-lbl" id="t-entrada">Audios a transcribir (Pendientes)</div>
+              <div class="folder-path" id="display-pendientes" style="cursor:pointer;" title="Haz clic para editar">—</div>
+              <input id="input-pendientes" type="text" class="folder-input" style="display:none;" placeholder="Ej: /Users/tuusuario/OneDrive/Pendientes">
+            </div>
+            <button class="btn-edit" id="btn-edit-pendientes" onclick="toggleEdit('pendientes')">✏️</button>
+          </div>
+
+          <!-- RUTA TRANSCRITAS -->
+          <div class="folder-row" id="row-transcritas">
+            <div class="folder-ico">📄</div>
+            <div class="folder-info" style="flex:1; min-width:0;">
+              <div class="folder-lbl" id="t-salida">Transcripciones .txt (Transcritas)</div>
+              <div class="folder-path" id="display-transcritas" style="cursor:pointer;" title="Haz clic para editar">—</div>
+              <input id="input-transcritas" type="text" class="folder-input" style="display:none;" placeholder="Ej: /Users/tuusuario/OneDrive/Transcritas">
+            </div>
+            <button class="btn-edit" id="btn-edit-transcritas" onclick="toggleEdit('transcritas')">✏️</button>
+          </div>
+
+          <!-- RUTA ARCHIVADOS -->
+          <div class="folder-row" id="row-archivados">
+            <div class="folder-ico">📦</div>
+            <div class="folder-info" style="flex:1; min-width:0;">
+              <div class="folder-lbl" id="t-archivados">Audios procesados (Archivados)</div>
+              <div class="folder-path" id="display-archivados" style="cursor:pointer;" title="Haz clic para editar">—</div>
+              <input id="input-archivados" type="text" class="folder-input" style="display:none;" placeholder="Ej: /Users/tuusuario/OneDrive/Archivados">
+            </div>
+            <button class="btn-edit" id="btn-edit-archivados" onclick="toggleEdit('archivados')">✏️</button>
+          </div>
+
+          <!-- GUARDAR -->
+          <div id="save-row" style="display:none; margin-top:0.6rem; gap:0.5rem; flex-wrap:wrap;">
+            <button class="btn-proc" onclick="guardarRutas()" id="btn-guardar">💾 Guardar rutas</button>
+            <button class="btn-proc danger" onclick="cancelarEdicion()">✕ Cancelar</button>
+          </div>
+
+          <!-- STATUS -->
+          <div id="config-status" style="display:none; margin-top:0.6rem; padding:0.6rem 0.9rem; background:var(--bg-glass); border:1px solid var(--border); border-radius:var(--r); font-size:0.79rem; color:var(--text-sub);"></div>
+          <div id="carpeta-status" style="display:none; margin-top:0.75rem; padding:0.6rem 0.9rem; background:var(--bg-glass); border:1px solid var(--border); border-radius:var(--r); font-size:0.79rem; color:var(--text-sub);"></div>
+
+          <button class="btn-folder-scan" id="btn-scan" onclick="procesarCarpeta()" style="margin-top:0.75rem;">▶ <span id="t-btn-scan">Transcribir carpeta Pendientes</span></button>
+        </div>
+
+        <!-- Controles para carpeta -->
+        <div class="controls">
+          <div class="ctrl">
+            <label for="sel-lang-carpeta" id="t-lang-carpeta">Perfil de idioma</label>
+            <select id="sel-lang-carpeta">
+              <option value="es-chile">Español Chileno</option>
+              <option value="es-spain">Español de España</option>
+              <option value="es-neutro">Español Neutro</option>
+              <option value="en">Inglés</option>
+              <option value="accento-mixto">Acento Mixto (Polaco-Español-Chileno)</option>
+            </select>
+          </div>
+          <div class="ctrl">
+            <label for="sel-model-carpeta" id="t-model-carpeta">Modelo Whisper</label>
+            <select id="sel-model-carpeta">
+              <optgroup label="Velocidad">
+                <option value="mlx-community/whisper-tiny-mlx">Tiny — Ultrarrápido</option>
+                <option value="mlx-community/whisper-base-mlx">Base — Rápido</option>
+              </optgroup>
+              <optgroup label="Equilibrio">
+                <option value="mlx-community/whisper-small-mlx">Small — Equilibrado</option>
+                <option value="mlx-community/whisper-medium-mlx">Medium — Preciso</option>
+              </optgroup>
+              <optgroup label="Precisión">
+                <option value="mlx-community/whisper-large-v3-turbo" selected>Large Turbo ⭐ — Recomendado</option>
+                <option value="mlx-community/whisper-large-v3-mlx">Large v3 — Máxima precisión</option>
+              </optgroup>
+            </select>
+          </div>
+        </div>
+
+        <!-- Progreso carpeta -->
+        <div class="prog-section">
+          <div class="prog-track"><div class="prog-fill" id="prog-bar-carpeta"></div></div>
+          <p class="prog-status" id="prog-status-carpeta">Listo.</p>
+          <p class="prog-eta" id="prog-eta-carpeta"></p>
+        </div>
+
+        <!-- Resultado carpeta -->
+        <div class="transcript-wrap" id="carpeta-result-wrap" style="display:none;">
+          <span class="section-label" id="t-last-transcript">Última transcripción</span>
+          <textarea id="transcript-carpeta" class="transcript" readonly placeholder="La última transcripción aparecerá aquí..."></textarea>
+        </div>
+
+      </div>
 
     </main>
   </div>
 </div>
 
 <script>
-// ════════════════════════════════════════════════════════════════
-// TRANSCRIPTOTEM — versión simplificada
-// Un servidor. Nada en background. Zero residual.
-// ════════════════════════════════════════════════════════════════
-
 const API = 'http://localhost:8000';
+let srvActivo=false,cola=[],archivoActual=null,texto='',procesando=false,detener=false,abort=null,historial=[],srvInterval=null,modoActual='manual';
+const dropZone=document.getElementById('drop-zone'),fileInput=document.getElementById('file-input'),progBar=document.getElementById('prog-bar'),progStatus=document.getElementById('prog-status'),progEta=document.getElementById('prog-eta'),transcript=document.getElementById('transcript'),queueWrap=document.getElementById('queue-wrap'),queueList=document.getElementById('queue-list'),btnTxt=document.getElementById('btn-txt'),btnPdf=document.getElementById('btn-pdf'),btnDocx=document.getElementById('btn-docx'),btnZip=document.getElementById('btn-zip'),btnProc=document.getElementById('btn-procesar'),btnDet=document.getElementById('btn-detener'),ctxPreset=document.getElementById('ctx-preset'),ctxText=document.getElementById('ctx-text');
+document.querySelectorAll('.tab-btn').forEach(btn=>{btn.addEventListener('click',()=>{document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));btn.classList.add('active');document.getElementById('panel-'+btn.dataset.tab).classList.add('active');});});
+document.getElementById('btn-collapse').addEventListener('click',()=>{const sb=document.getElementById('sidebar');const c=sb.classList.toggle('collapsed');document.getElementById('btn-collapse').textContent=c?'⟩':'⟨';});
+function setMode(mode){modoActual=mode;document.getElementById('mode-manual').classList.toggle('active',mode==='manual');document.getElementById('mode-carpeta').classList.toggle('active',mode==='carpeta');document.getElementById('panel-manual').style.display=mode==='manual'?'block':'none';document.getElementById('panel-carpeta').style.display=mode==='carpeta'?'block':'none';progBar.style.width='0%';progStatus.textContent='Listo.';progEta.textContent='';}
+function setSrvUI(estado){const dot=document.getElementById('hdr-dot'),txt=document.getElementById('hdr-txt'),btn=document.getElementById('btn-srv'),icon=document.getElementById('srv-icon'),title=document.getElementById('srv-title'),desc=document.getElementById('srv-desc'),cSrv=document.getElementById('chip-srv'),cWsp=document.getElementById('chip-wsp'),aviso=document.getElementById('aviso-srv');dot.className='srv-dot';[cSrv,cWsp].forEach(c=>c.className='chip');if(estado==='off'){txt.textContent='Servidor apagado';btn.textContent='▶ Iniciar';btn.className='btn-srv start';btn.disabled=false;icon.textContent='🖥️';title.textContent='Servidor apagado';desc.textContent='Inícialo antes de transcribir. Al apagarlo, el Mac queda 100% libre.';cSrv.innerHTML='<div class="chip-dot"></div><span>Servidor: apagado</span>';cWsp.innerHTML='<div class="chip-dot"></div><span>Whisper: no cargado</span>';aviso.style.display='block';if(modoActual==='transcripcion')setHeaderBadge('off');srvActivo=false;}else if(estado==='starting'){dot.classList.add('mid');txt.textContent='Iniciando...';btn.textContent='⏳ Iniciando...';btn.disabled=true;icon.textContent='⏳';title.textContent='Iniciando servidor...';desc.textContent='Cargando Whisper en el M3. Tarda unos segundos.';}else if(estado==='on'){dot.classList.add('on');txt.textContent='Servidor activo';btn.textContent='⏹ Apagar';btn.className='btn-srv stop';btn.disabled=false;icon.textContent='✅';title.textContent='Servidor activo';desc.textContent='Whisper listo. Ve a Transcribir y sube tus audios o procesa la carpeta OneDrive.';cSrv.classList.add('ok');cSrv.innerHTML='<div class="chip-dot"></div><span>Servidor: activo</span>';cWsp.classList.add('ok');cWsp.innerHTML='<div class="chip-dot"></div><span>Whisper: listo (M3 ⚡)</span>';aviso.style.display='none';if(modoActual==='transcripcion')setHeaderBadge('on');srvActivo=true;}}
+function setHeaderBadge(e){const dot=document.getElementById('hdr-dot'),txt=document.getElementById('hdr-txt');dot.className='srv-dot';if(e==='off')txt.textContent='Servidor apagado';else if(e==='on'){dot.classList.add('on');txt.textContent='Servidor activo';}}
+function logSrv(msg){const t=new Date().toLocaleTimeString('es-CL');document.getElementById('srv-log').innerHTML=`[${t}] ${msg}`;}
+async function ping(){try{const r=await fetch(`${API}/`,{signal:AbortSignal.timeout(2000)});return r.status<500;}catch{return false;}}
+async function toggleServidor(){if(srvActivo){clearInterval(srvInterval);setSrvUI('off');document.getElementById('srv-log').innerHTML='<strong style="color:var(--ok)">✅ Servidor detenido desde la app.</strong><br><span style="color:var(--text-sub)">Para liberar el Mac completamente, ve a Terminal y presiona:</span><br><div class="code-block"><pre id="cmd-shutdown" style="color:var(--warn);">Ctrl + C</pre><button onclick="copiarCtrlC()" class="btn-copy" id="btn-copy-shutdown">📋 Copiar</button></div><span style="color:var(--text-muted);font-size:0.73rem;">Después el Mac queda 100% libre.</span>';return;}setSrvUI('starting');logSrv('Verificando...');if(await ping()){setSrvUI('on');logSrv('Servidor detectado y listo ✓');iniciarHeartbeat();return;}document.getElementById('srv-log').innerHTML=`<strong style="color:var(--warn)">Abre Terminal y ejecuta:</strong> <button onclick="copiarComandos()" id="btn-copy-cmd" class="btn-copy">📋 Copiar</button><br><div class="code-block"><pre style="color:var(--ice);margin-top:0.35rem;">cd "/Users/TU_USUARIO/ruta/a/Transcriptotem_WebApp_BACKUP"\nsource venv/bin/activate && python3 main.py</pre></div><span style="color:var(--text-muted)">Detectaremos el servidor automáticamente...</span>`;let intentos=0;srvInterval=setInterval(async()=>{intentos++;if(await ping()){clearInterval(srvInterval);setSrvUI('on');logSrv('¡Servidor activo! ✓');iniciarHeartbeat();restaurarRutasGuardadas();}if(intentos>60){clearInterval(srvInterval);setSrvUI('off');logSrv('Tiempo agotado. Verifica Terminal.');}},2000);}
+function iniciarHeartbeat(){clearInterval(srvInterval);srvInterval=setInterval(async()=>{if(srvActivo&&!await ping()){setSrvUI('off');logSrv('⚠️ Conexión perdida con el servidor.');}},12000);}
+window.addEventListener('load',async()=>{if(await ping()){setSrvUI('on');logSrv('Servidor detectado al cargar ✓');iniciarHeartbeat();restaurarRutasGuardadas();}else setSrvUI('off');});
+function actualizarHistorial(){const empty=document.getElementById('hist-empty'),list=document.getElementById('hist-list');if(!historial.length){empty.style.display='block';list.style.display='none';return;}empty.style.display='none';list.style.display='flex';list.innerHTML=historial.map(h=>{const hora=new Date(h.ts).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});return`<li class="hist-item"><div class="hist-top"><div class="hist-name" title="${h.nombre}">${h.nombre}</div><div class="hist-time">${hora}</div></div><div class="hist-actions"><button class="mini-btn" data-action="txt" data-n="${encodeURIComponent(h.nombre)}">↓ TXT</button><button class="mini-btn" data-action="ver" data-n="${encodeURIComponent(h.nombre)}">Ver</button></div></li>`;}).join('');}
+document.getElementById('hist-list').addEventListener('click',e=>{const btn=e.target.closest('button');if(!btn)return;const nombre=decodeURIComponent(btn.dataset.n||'');const item=historial.find(h=>h.nombre===nombre);if(!item)return;if(btn.dataset.action==='txt')descargarTxt(item.nombre,item.texto);if(btn.dataset.action==='ver'){transcript.value=item.texto;texto=item.texto;archivoActual=item;progStatus.textContent=`Viendo: ${item.nombre}`;habilitarExport();}});
+ctxPreset.addEventListener('change',()=>{const p=ctxPreset.options[ctxPreset.selectedIndex]?.getAttribute('data-prompt')||'';if(p)ctxText.value=p;});
+dropZone.addEventListener('click',()=>fileInput.click());
+document.getElementById('btn-pick').addEventListener('click',e=>{e.stopPropagation();fileInput.click();});
+dropZone.addEventListener('dragover',e=>{e.preventDefault();dropZone.classList.add('over');});
+dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('over'));
+dropZone.addEventListener('drop',e=>{e.preventDefault();dropZone.classList.remove('over');const files=Array.from(e.dataTransfer.files).filter(f=>/\.(m4a|mp3|wav)$/i.test(f.name));if(files.length)agregarArchivos(files);});
+fileInput.addEventListener('change',()=>{if(fileInput.files.length)agregarArchivos(Array.from(fileInput.files));fileInput.value='';});
+function agregarArchivos(files){cola=cola.concat(files.map(f=>({file:f,nombre:f.name,estado:'pendiente',texto:''})));renderCola();document.getElementById('procesar-section').style.display='flex';progStatus.textContent=`${cola.length} archivo(s) en cola.`;}
+function renderCola(){queueWrap.style.display=cola.length?'block':'none';queueList.innerHTML=cola.map((item,i)=>`<li class="q-item"><span class="badge b-${item.estado==='pendiente'?'pending':item.estado==='procesando'?'working':item.estado==='listo'?'done':'error'}">${item.estado}</span><span>${item.nombre}</span><span style="color:var(--text-muted);font-size:0.73rem;">${fmtBytes(item.file.size)}</span>${item.estado==='pendiente'?`<button class="q-remove" data-i="${i}">✕</button>`:''}</li>`).join('');queueList.querySelectorAll('.q-remove').forEach(btn=>{btn.addEventListener('click',()=>{cola.splice(parseInt(btn.dataset.i),1);renderCola();if(!cola.length){document.getElementById('procesar-section').style.display='none';progStatus.textContent='Listo.';}});});}
+function fmtBytes(b){if(b<1024)return b+' B';if(b<1048576)return(b/1024).toFixed(1)+' KB';return(b/1048576).toFixed(2)+' MB';}
+async function transcribirUno(item,idx,total){progBar.style.width='10%';progStatus.textContent=`Enviando ${idx}/${total}: ${item.nombre}`;progEta.textContent='Preparando...';transcript.value='';item.estado='procesando';archivoActual=item;renderCola();const fd=new FormData();fd.append('file',item.file);fd.append('language',document.getElementById('sel-lang').value);fd.append('model',document.getElementById('sel-model').value);fd.append('context',ctxText.value||'');abort=new AbortController();progBar.style.width='30%';progStatus.textContent=`Transcribiendo ${idx}/${total}: ${item.nombre}`;const t0=Date.now();let durAudio=null;try{const ac=new AudioContext();const buf=await item.file.arrayBuffer();durAudio=(await ac.decodeAudioData(buf)).duration;ac.close();}catch(_){}const timer=setInterval(()=>{const el=Math.floor((Date.now()-t0)/1000);let s=`⏱ ${pad(Math.floor(el/60))}:${pad(el%60)} transcurridos`;if(durAudio){const rest=Math.max(Math.round(durAudio/6-el),0);s+=` — restante ~${pad(Math.floor(rest/60))}:${pad(rest%60)}`;}progEta.textContent=s+' · Whisper activo ✓';},1000);try{const res=await fetch(`${API}/api/transcribe`,{method:'POST',body:fd,signal:abort.signal});if(!res.ok){let d=`Error ${res.status}`;try{d=(await res.json()).detail||d;}catch(_){}throw new Error(d);}const data=await res.json();progBar.style.width='100%';item.estado='listo';item.texto=data.text||'';historial.unshift({nombre:item.nombre,texto:item.texto,ts:Date.now()});actualizarHistorial();transcript.value=item.texto;texto=item.texto;transcript.scrollTop=0;progStatus.textContent=`✅ ${item.nombre}`;progEta.textContent='';renderCola();habilitarExport();}catch(err){if(err.name==='AbortError'||detener){item.estado='pendiente';renderCola();progStatus.textContent='Detenido.';progEta.textContent='';throw new Error('detenido');}item.estado='error';renderCola();progStatus.textContent=`Error: ${err.message}`;progEta.textContent='';throw err;}finally{clearInterval(timer);abort=null;}}
+async function procesarCola(){if(procesando)return;const pend=cola.filter(a=>a.estado==='pendiente');if(!pend.length){progStatus.textContent='No hay archivos pendientes.';return;}procesando=true;detener=false;btnProc.disabled=true;btnDet.style.display='inline-flex';btnDet.disabled=false;const total=cola.length;try{while(true){const item=cola.find(a=>a.estado==='pendiente');if(!item)break;const idx=cola.filter(a=>a.estado==='listo').length+1;await transcribirUno(item,idx,total);}progStatus.textContent='¡Cola completada!';progEta.textContent='Revisa el historial para descargar.';}catch(_){}finally{procesando=false;btnProc.disabled=false;btnDet.style.display='none';}}
+btnProc.addEventListener('click',procesarCola);
+btnDet.addEventListener('click',()=>{detener=true;btnDet.disabled=true;if(abort)abort.abort();});
+async function procesarCarpeta(){if(!srvActivo){progStatus.textContent='⚠️ Inicia el servidor primero.';return;}const btn=document.getElementById('btn-scan'),statusEl=document.getElementById('carpeta-status');btn.disabled=true;btn.textContent='⏳ Procesando...';statusEl.style.display='block';statusEl.textContent='Consultando carpeta Pendientes...';progBar.style.width='5%';progStatus.textContent='Iniciando procesamiento de carpeta...';progEta.textContent='';try{const res=await fetch(`${API}/api/transcribe-folder`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({language:document.getElementById('sel-lang-carpeta').value,model:document.getElementById('sel-model-carpeta').value,context:''})});if(!res.ok){let d=`Error ${res.status}`;try{d=(await res.json()).detail||d;}catch(_){}throw new Error(d);}const reader=res.body.getReader();const dec=new TextDecoder();let buf='';while(true){const{done,value}=await reader.read();if(done)break;buf+=dec.decode(value,{stream:true});const lines=buf.split('\n');buf=lines.pop();for(const line of lines){if(!line.trim())continue;try{const ev=JSON.parse(line);handleCarpetaEvent(ev,statusEl);}catch(_){}}}}catch(err){progStatus.textContent=`Error: ${err.message}`;statusEl.textContent=`Error: ${err.message}`;}finally{btn.disabled=false;btn.textContent='▶ Transcribir carpeta Pendientes';}}
+function handleCarpetaEvent(ev,statusEl){
+  const pb=document.getElementById('prog-bar-carpeta');
+  const ps=document.getElementById('prog-status-carpeta');
+  const pe=document.getElementById('prog-eta-carpeta');
+  const rw=document.getElementById('carpeta-result-wrap');
+  const tc=document.getElementById('transcript-carpeta');
+  if(ev.type==='start'){ps.textContent=`${ev.total} archivo(s) encontrado(s).`;statusEl.textContent=ev.total>0?`Procesando ${ev.total} audio(s)...`:'✅ No hay archivos pendientes.';if(ev.total===0)pb.style.width='100%';}
+  else if(ev.type==='progress'){const pct=Math.round((ev.done/ev.total)*100);pb.style.width=pct+'%';ps.textContent=`Transcribiendo ${ev.done}/${ev.total}: ${ev.archivo}`;pe.textContent=ev.tiempo?`⏱ ${ev.tiempo} · Whisper activo ✓`:'';statusEl.textContent=`Procesando: ${ev.archivo} (${ev.done}/${ev.total})`;}
+  else if(ev.type==='done'){pb.style.width='100%';ps.textContent=`✅ ${ev.completados}/${ev.total} completados.`;pe.textContent=ev.errores>0?`${ev.errores} error(es).`:'';statusEl.textContent=`Completado. ${ev.completados} transcripciones en Transcritas.`;(ev.resultados||[]).forEach(r=>{if(r.texto)historial.unshift({nombre:r.nombre,texto:r.texto,ts:Date.now()});});actualizarHistorial();if(ev.resultados?.length>0&&ev.resultados[ev.resultados.length-1].texto){const last=ev.resultados[ev.resultados.length-1];rw.style.display='block';tc.value=last.texto;}}
+  else if(ev.type==='error'){ps.textContent=`❌ Error en ${ev.archivo}: ${ev.mensaje}`;}}
+function pad(n){return String(n).padStart(2,'0');}
+function habilitarExport(){const hay=(transcript.value||'').trim().length>0;[btnTxt,btnPdf,btnDocx,btnZip].forEach(b=>b.disabled=!hay);}
+transcript.addEventListener('input',habilitarExport);
+function descargarTxt(nombre,contenido){const base=nombre.replace(/\.[^/.]+$/u,'');const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(new Blob([contenido],{type:'text/plain;charset=utf-8'})),download:`${base}.txt`});document.body.appendChild(a);a.click();a.remove();}
+btnTxt.addEventListener('click',()=>{const t=archivoActual?.texto||transcript.value||'';if(t.trim())descargarTxt(archivoActual?.nombre||'transcripcion',t);});
+async function exportarAPI(endpoint,ext){const t=(archivoActual?.texto||transcript.value||'').trim();if(!t)return;const nombre=(archivoActual?.nombre||'transcripcion').replace(/\.[^/.]+$/u,'');try{const res=await fetch(`${API}/api/export/${endpoint}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:t,filename:nombre})});if(!res.ok)return;const blob=await res.blob();const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(blob),download:`${nombre}.${ext}`});document.body.appendChild(a);a.click();a.remove();}catch(e){console.error(e);}}
+btnPdf.addEventListener('click',()=>exportarAPI('pdf','pdf'));
+btnDocx.addEventListener('click',()=>exportarAPI('docx','docx'));
+btnZip.addEventListener('click',async()=>{if(!historial.length)return;try{const res=await fetch(`${API}/api/export/zip`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({items:historial.map(h=>({filename:h.nombre,text:h.texto}))})});if(!res.ok)return;const blob=await res.blob();const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(blob),download:'transcripciones.zip'});document.body.appendChild(a);a.click();a.remove();}catch(e){console.error(e);}});
+function copiarCtrlC(){navigator.clipboard.writeText('Ctrl + C').catch(()=>{});const btn=document.getElementById('btn-copy-shutdown');if(btn){const orig=btn.textContent;btn.textContent='✅ Copiado';btn.style.color='var(--ok)';setTimeout(()=>{btn.textContent=orig;btn.style.color='';},2000);}}
+function copiarComandos(){const cmds=`cd "/Users/TU_USUARIO/ruta/a/Transcriptotem_WebApp_BACKUP"\nsource venv/bin/activate && python3 main.py`;navigator.clipboard.writeText(cmds).then(()=>{const btn=document.getElementById('btn-copy-cmd');if(btn){const orig=btn.textContent;btn.textContent='✅ Copiado';btn.style.color='var(--ok)';setTimeout(()=>{btn.textContent=orig;btn.style.color='';},2000);}}).catch(()=>{const ta=document.createElement('textarea');ta.value=cmds;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();});}
+// ── CONFIGURACIÓN DE RUTAS ─────────────────────────────────────
+let editando = false;
 
-// ── Estado ─────────────────────────────────────────────────────
-let srvActivo       = false;
-let cola            = [];
-let archivoActual   = null;
-let texto           = '';
-let procesando      = false;
-let detener         = false;
-let abort           = null;
-let historial       = [];
-let srvInterval     = null;
-let modoActual      = 'manual';  // 'manual' | 'carpeta'
-
-// ── DOM ────────────────────────────────────────────────────────
-const dropZone   = document.getElementById('drop-zone');
-const fileInput  = document.getElementById('file-input');
-const progBar    = document.getElementById('prog-bar');
-const progStatus = document.getElementById('prog-status');
-const progEta    = document.getElementById('prog-eta');
-const transcript = document.getElementById('transcript');
-const queueWrap  = document.getElementById('queue-wrap');
-const queueList  = document.getElementById('queue-list');
-const btnTxt     = document.getElementById('btn-txt');
-const btnPdf     = document.getElementById('btn-pdf');
-const btnDocx    = document.getElementById('btn-docx');
-const btnZip     = document.getElementById('btn-zip');
-const btnProc    = document.getElementById('btn-procesar');
-const btnDet     = document.getElementById('btn-detener');
-const ctxPreset  = document.getElementById('ctx-preset');
-const ctxText    = document.getElementById('ctx-text');
-
-// ── TABS ───────────────────────────────────────────────────────
-document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
-  });
-});
-
-// ── SIDEBAR ────────────────────────────────────────────────────
-document.getElementById('btn-collapse').addEventListener('click', () => {
-  const sb = document.getElementById('sidebar');
-  const c  = sb.classList.toggle('collapsed');
-  document.getElementById('btn-collapse').textContent = c ? '⟩' : '⟨';
-});
-
-// ── MODO MANUAL / CARPETA ──────────────────────────────────────
-function setMode(mode) {
-  modoActual = mode;
-  document.getElementById('mode-manual').classList.toggle('active',   mode === 'manual');
-  document.getElementById('mode-carpeta').classList.toggle('active',  mode === 'carpeta');
-  document.getElementById('panel-manual').style.display   = mode === 'manual'  ? 'block' : 'none';
-  document.getElementById('panel-carpeta').style.display  = mode === 'carpeta' ? 'block' : 'none';
-  // Reset progress cuando cambias de modo
-  progBar.style.width = '0%';
-  progStatus.textContent = 'Listo.';
-  progEta.textContent = '';
-}
-
-// ── SERVIDOR ───────────────────────────────────────────────────
-function setSrvUI(estado) {
-  const dot   = document.getElementById('hdr-dot');
-  const txt   = document.getElementById('hdr-txt');
-  const btn   = document.getElementById('btn-srv');
-  const icon  = document.getElementById('srv-icon');
-  const title = document.getElementById('srv-title');
-  const desc  = document.getElementById('srv-desc');
-  const cSrv  = document.getElementById('chip-srv');
-  const cWsp  = document.getElementById('chip-wsp');
-  const aviso = document.getElementById('aviso-srv');
-
-  dot.className = 'srv-dot';
-  [cSrv, cWsp].forEach(c => c.className = 'chip');
-
-  if (estado === 'off') {
-    txt.textContent   = 'Servidor apagado';
-    btn.textContent   = '▶ Iniciar'; btn.className = 'btn-srv start'; btn.disabled = false;
-    icon.textContent  = '🖥️'; title.textContent = 'Servidor apagado';
-    desc.textContent  = 'Inícialo antes de transcribir. Al apagarlo, el Mac queda 100% libre.';
-    cSrv.innerHTML    = '<div class="chip-dot"></div><span>Servidor: apagado</span>';
-    cWsp.innerHTML    = '<div class="chip-dot"></div><span>Whisper: no cargado</span>';
-    aviso.style.display = 'block';
-    srvActivo = false;
-  } else if (estado === 'starting') {
-    dot.classList.add('mid'); txt.textContent = 'Iniciando...';
-    btn.textContent = '⏳ Iniciando...'; btn.disabled = true;
-    icon.textContent = '⏳'; title.textContent = 'Iniciando servidor...';
-    desc.textContent = 'Cargando Whisper en el M3. Tarda unos segundos.';
-    cSrv.classList.add('mid'); cSrv.innerHTML = '<div class="chip-dot"></div><span>Servidor: iniciando</span>';
-    cWsp.innerHTML = '<div class="chip-dot"></div><span>Whisper: cargando</span>';
-  } else if (estado === 'on') {
-    dot.classList.add('on'); txt.textContent = 'Servidor activo';
-    btn.textContent = '⏹ Apagar'; btn.className = 'btn-srv stop'; btn.disabled = false;
-    icon.textContent = '✅'; title.textContent = 'Servidor activo';
-    desc.textContent = 'Whisper listo. Ve a Transcribir y sube tus audios o procesa la carpeta OneDrive.';
-    cSrv.classList.add('ok'); cSrv.innerHTML = '<div class="chip-dot"></div><span>Servidor: activo</span>';
-    cWsp.classList.add('ok'); cWsp.innerHTML = '<div class="chip-dot"></div><span>Whisper: listo (M3 ⚡)</span>';
-    aviso.style.display = 'none';
-    srvActivo = true;
-  }
-}
-
-function logSrv(msg) {
-  const t = new Date().toLocaleTimeString('es-CL');
-  document.getElementById('srv-log').innerHTML = `[${t}] ${msg}`;
-}
-
-async function ping() {
+async function cargarConfig() {
+  if (!srvActivo) return;
   try {
-    const r = await fetch(`${API}/`, { signal: AbortSignal.timeout(2000) });
-    return r.status < 500;
-  } catch { return false; }
+    const r = await fetch(`${API}/api/config`);
+    if (!r.ok) return;
+    const cfg = await r.json();
+    mostrarRutas(cfg);
+  } catch(_) {}
 }
 
-async function toggleServidor() {
-  if (srvActivo) {
-    // Apagar
-    clearInterval(srvInterval);
-    setSrvUI('off');
-    document.getElementById('srv-log').innerHTML =
-      '<strong style="color:var(--mint)">✅ Servidor detenido desde la app.</strong><br>' +
-      '<span style="color:var(--sub)">Para liberar el Mac completamente, ve a Terminal y presiona:</span><br>' +
-      '<div style="position:relative;margin:0.4rem 0;">' +
-        '<pre id="cmd-shutdown" style="font-family:\'JetBrains Mono\',monospace;font-size:0.76rem;color:var(--orange);background:rgba(0,0,0,0.25);border:1px solid var(--border);border-radius:6px;padding:0.5rem 3rem 0.5rem 0.85rem;white-space:pre-wrap;word-break:break-all;margin:0;">Ctrl + C</pre>' +
-        '<button onclick="copiarCtrlC()" style="position:absolute;top:0.3rem;right:0.4rem;background:var(--hover);border:1px solid var(--border);color:var(--sub);border-radius:4px;padding:0.15rem 0.45rem;font-size:0.7rem;cursor:pointer;" id="btn-copy-shutdown">📋 Copiar</button>' +
-      '</div>' +
-      '<span style="color:var(--muted);font-size:0.75rem;">Después de eso, el Mac queda 100% libre. No queda ningún proceso corriendo.</span>';
+function mostrarRutas(cfg) {
+  ['pendientes','transcritas','archivados'].forEach(k => {
+    const d = document.getElementById(`display-${k}`);
+    const i = document.getElementById(`input-${k}`);
+    if (d) d.textContent = cfg[k] || '—';
+    if (i) i.value = cfg[k] || '';
+    // Color según si existe en disco
+    if (d) d.style.color = cfg[k + '_ok'] ? 'var(--ok)' : 'var(--warn)';
+  });
+}
+
+function toggleEdit(campo) {
+  const allFields = ['pendientes','transcritas','archivados'];
+  editando = true;
+  allFields.forEach(k => {
+    const display = document.getElementById(`display-${k}`);
+    const input   = document.getElementById(`input-${k}`);
+    const btn     = document.getElementById(`btn-edit-${k}`);
+    display.style.display = 'none';
+    input.style.display   = 'block';
+    if (btn) btn.style.display = 'none';
+  });
+  document.getElementById('save-row').style.display = 'flex';
+  // Focus en el campo clickeado
+  const target = document.getElementById(`input-${campo}`);
+  if (target) { target.focus(); target.select(); }
+}
+
+function cancelarEdicion() {
+  const allFields = ['pendientes','transcritas','archivados'];
+  allFields.forEach(k => {
+    const display = document.getElementById(`display-${k}`);
+    const input   = document.getElementById(`input-${k}`);
+    const btn     = document.getElementById(`btn-edit-${k}`);
+    display.style.display = 'block';
+    input.style.display   = 'none';
+    if (btn) btn.style.display = 'block';
+  });
+  document.getElementById('save-row').style.display = 'none';
+  editando = false;
+}
+
+async function guardarRutas() {
+  const payload = {
+    pendientes:  document.getElementById('input-pendientes').value.trim(),
+    transcritas: document.getElementById('input-transcritas').value.trim(),
+    archivados:  document.getElementById('input-archivados').value.trim(),
+  };
+
+  if (!payload.pendientes || !payload.transcritas || !payload.archivados) {
+    mostrarConfigStatus('⚠️ Completa las 3 rutas antes de guardar.', 'warn');
     return;
   }
-  setSrvUI('starting');
-  logSrv('Verificando...');
-  if (await ping()) {
-    setSrvUI('on'); logSrv('Servidor detectado y listo ✓'); iniciarHeartbeat(); return;
-  }
-  // Mostrar instrucciones y esperar
-  document.getElementById('srv-log').innerHTML =
-    `<strong style="color:var(--orange)">Abre Terminal y ejecuta:</strong> ` +
-    `<button onclick="copiarComandos()" id="btn-copy-cmd" style="background:var(--hover);border:1px solid var(--border);color:var(--sub);border-radius:4px;padding:0.1rem 0.45rem;font-size:0.7rem;cursor:pointer;">📋 Copiar</button><br>` +
-    `<pre style="color:var(--blue);font-family:'JetBrains Mono',monospace;font-size:0.73rem;background:rgba(0,0,0,0.2);border-radius:5px;padding:0.5rem 0.7rem;margin:0.35rem 0;white-space:pre-wrap;word-break:break-all;overflow-x:hidden;">cd "/Users/TU_USUARIO/ruta/a/Transcriptotem_WebApp_BACKUP"
-source venv/bin/activate &amp;&amp; python3 main.py</pre>` +
-    `<span style="color:var(--muted)">Detectaremos el servidor automáticamente...</span>`;
 
-  let intentos = 0;
-  srvInterval = setInterval(async () => {
-    intentos++;
-    if (await ping()) {
-      clearInterval(srvInterval);
-      setSrvUI('on'); logSrv('¡Servidor activo! ✓'); iniciarHeartbeat();
-    }
-    if (intentos > 60) { clearInterval(srvInterval); setSrvUI('off'); logSrv('Tiempo agotado. Verifica Terminal.'); }
-  }, 2000);
-}
-
-function iniciarHeartbeat() {
-  clearInterval(srvInterval);
-  srvInterval = setInterval(async () => {
-    if (srvActivo && !await ping()) { setSrvUI('off'); logSrv('⚠️ Conexión perdida con el servidor.'); }
-  }, 12000);
-}
-
-// Detectar al cargar
-window.addEventListener('load', async () => {
-  if (await ping()) { setSrvUI('on'); logSrv('Servidor detectado al cargar ✓'); iniciarHeartbeat(); }
-  else setSrvUI('off');
-});
-
-// ── HISTORIAL ──────────────────────────────────────────────────
-function actualizarHistorial() {
-  const empty = document.getElementById('hist-empty');
-  const list  = document.getElementById('hist-list');
-  if (!historial.length) { empty.style.display='block'; list.style.display='none'; return; }
-  empty.style.display = 'none'; list.style.display = 'flex';
-  list.innerHTML = historial.map(h => {
-    const hora = new Date(h.ts).toLocaleTimeString('es-CL', {hour:'2-digit', minute:'2-digit'});
-    return `<li class="hist-item">
-      <div class="hist-top">
-        <div class="hist-name" title="${h.nombre}">${h.nombre}</div>
-        <div class="hist-time">${hora}</div>
-      </div>
-      <div class="hist-actions">
-        <button class="mini-btn" data-action="txt" data-n="${encodeURIComponent(h.nombre)}">↓ TXT</button>
-        <button class="mini-btn" data-action="ver" data-n="${encodeURIComponent(h.nombre)}">Ver</button>
-      </div>
-    </li>`;
-  }).join('');
-}
-
-document.getElementById('hist-list').addEventListener('click', e => {
-  const btn = e.target.closest('button'); if (!btn) return;
-  const nombre = decodeURIComponent(btn.dataset.n || '');
-  const item = historial.find(h => h.nombre === nombre); if (!item) return;
-  if (btn.dataset.action === 'txt') descargarTxt(item.nombre, item.texto);
-  if (btn.dataset.action === 'ver') {
-    transcript.value = item.texto; texto = item.texto;
-    archivoActual = item; progStatus.textContent = `Viendo: ${item.nombre}`; habilitarExport();
-  }
-});
-
-// ── PRESETS ────────────────────────────────────────────────────
-ctxPreset.addEventListener('change', () => {
-  const p = ctxPreset.options[ctxPreset.selectedIndex]?.getAttribute('data-prompt') || '';
-  if (p) ctxText.value = p;
-});
-
-// ── DRAG & DROP ────────────────────────────────────────────────
-dropZone.addEventListener('click', () => fileInput.click());
-document.getElementById('btn-pick').addEventListener('click', e => { e.stopPropagation(); fileInput.click(); });
-dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('over'); });
-dropZone.addEventListener('dragleave', () => dropZone.classList.remove('over'));
-dropZone.addEventListener('drop', e => {
-  e.preventDefault(); dropZone.classList.remove('over');
-  const files = Array.from(e.dataTransfer.files).filter(f => /\.(m4a|mp3|wav)$/i.test(f.name));
-  if (files.length) agregarArchivos(files);
-});
-fileInput.addEventListener('change', () => {
-  if (fileInput.files.length) agregarArchivos(Array.from(fileInput.files));
-  fileInput.value = '';
-});
-
-// ── COLA ───────────────────────────────────────────────────────
-function agregarArchivos(files) {
-  cola = cola.concat(files.map(f => ({ file: f, nombre: f.name, estado: 'pendiente', texto: '' })));
-  renderCola();
-  document.getElementById('procesar-section').style.display = 'flex';
-  progStatus.textContent = `${cola.length} archivo(s) en cola.`;
-}
-
-function renderCola() {
-  queueWrap.style.display = cola.length ? 'block' : 'none';
-  queueList.innerHTML = cola.map((item, i) => `
-    <li class="q-item">
-      <span class="badge b-${item.estado === 'pendiente' ? 'pending' : item.estado === 'procesando' ? 'working' : item.estado === 'listo' ? 'done' : 'error'}">${item.estado}</span>
-      <span>${item.nombre}</span>
-      <span style="color:var(--muted);font-size:0.75rem;">${fmtBytes(item.file.size)}</span>
-      ${item.estado === 'pendiente' ? `<button class="q-remove" data-i="${i}">✕</button>` : ''}
-    </li>`).join('');
-  queueList.querySelectorAll('.q-remove').forEach(btn => {
-    btn.addEventListener('click', () => {
-      cola.splice(parseInt(btn.dataset.i), 1); renderCola();
-      if (!cola.length) { document.getElementById('procesar-section').style.display = 'none'; progStatus.textContent = 'Listo.'; }
-    });
-  });
-}
-
-function fmtBytes(b) {
-  if (b < 1024) return b + ' B';
-  if (b < 1048576) return (b/1024).toFixed(1) + ' KB';
-  return (b/1048576).toFixed(2) + ' MB';
-}
-
-// ── TRANSCRIPCIÓN MANUAL ───────────────────────────────────────
-async function transcribirUno(item, idx, total) {
-  progBar.style.width = '10%';
-  progStatus.textContent = `Enviando ${idx}/${total}: ${item.nombre}`;
-  progEta.textContent = 'Preparando...';
-  transcript.value = '';
-  item.estado = 'procesando'; archivoActual = item; renderCola();
-
-  const fd = new FormData();
-  fd.append('file', item.file);
-  fd.append('language', document.getElementById('sel-lang').value);
-  fd.append('model', document.getElementById('sel-model').value);
-  fd.append('context', ctxText.value || '');
-  abort = new AbortController();
-  progBar.style.width = '30%';
-  progStatus.textContent = `Transcribiendo ${idx}/${total}: ${item.nombre}`;
-
-  // Timer
-  const t0 = Date.now(); let durAudio = null;
-  try { const ac = new AudioContext(); const buf = await item.file.arrayBuffer(); durAudio = (await ac.decodeAudioData(buf)).duration; ac.close(); } catch(_) {}
-  const timer = setInterval(() => {
-    const el = Math.floor((Date.now()-t0)/1000);
-    let s = `⏱ ${pad(Math.floor(el/60))}:${pad(el%60)} transcurridos`;
-    if (durAudio) { const rest = Math.max(Math.round(durAudio/6 - el), 0); s += ` — restante ~${pad(Math.floor(rest/60))}:${pad(rest%60)}`; }
-    progEta.textContent = s + ' · Whisper activo ✓';
-  }, 1000);
+  const btn = document.getElementById('btn-guardar');
+  btn.textContent = '⏳ Guardando...'; btn.disabled = true;
 
   try {
-    const res = await fetch(`${API}/api/transcribe`, { method:'POST', body:fd, signal:abort.signal });
-    if (!res.ok) { let d=`Error ${res.status}`; try{d=(await res.json()).detail||d;}catch(_){} throw new Error(d); }
-    const data = await res.json();
-    progBar.style.width = '100%';
-    item.estado = 'listo'; item.texto = data.text || '';
-    historial.unshift({ nombre: item.nombre, texto: item.texto, ts: Date.now() });
-    actualizarHistorial();
-    transcript.value = item.texto; texto = item.texto; transcript.scrollTop = 0;
-    progStatus.textContent = `✅ ${item.nombre}`; progEta.textContent = '';
-    renderCola(); habilitarExport();
-  } catch(err) {
-    if (err.name === 'AbortError' || detener) {
-      item.estado = 'pendiente'; renderCola();
-      progStatus.textContent = 'Detenido.'; progEta.textContent = ''; throw new Error('detenido');
-    }
-    item.estado = 'error'; renderCola();
-    progStatus.textContent = `Error: ${err.message}`; progEta.textContent = ''; throw err;
-  } finally { clearInterval(timer); abort = null; }
-}
-
-async function procesarCola() {
-  if (procesando) return;
-  const pend = cola.filter(a => a.estado === 'pendiente');
-  if (!pend.length) { progStatus.textContent = 'No hay archivos pendientes.'; return; }
-  procesando = true; detener = false;
-  btnProc.disabled = true; btnDet.style.display = 'inline-flex'; btnDet.disabled = false;
-  const total = cola.length;
-  try {
-    while (true) {
-      const item = cola.find(a => a.estado === 'pendiente'); if (!item) break;
-      const idx = cola.filter(a => a.estado === 'listo').length + 1;
-      await transcribirUno(item, idx, total);
-    }
-    progStatus.textContent = '¡Cola completada!';
-    progEta.textContent = 'Revisa el historial para descargar.';
-  } catch(_) {}
-  finally { procesando = false; btnProc.disabled = false; btnDet.style.display = 'none'; }
-}
-
-btnProc.addEventListener('click', procesarCola);
-btnDet.addEventListener('click', () => { detener = true; btnDet.disabled = true; if (abort) abort.abort(); });
-
-// ── MODO CARPETA ───────────────────────────────────────────────
-async function procesarCarpeta() {
-  if (!srvActivo) { progStatus.textContent = '⚠️ Inicia el servidor primero.'; return; }
-  const btn = document.getElementById('btn-scan');
-  const statusEl = document.getElementById('carpeta-status');
-  btn.disabled = true; btn.textContent = '⏳ Procesando...';
-  statusEl.style.display = 'block'; statusEl.textContent = 'Consultando carpeta Pendientes...';
-  progBar.style.width = '5%'; progStatus.textContent = 'Iniciando procesamiento de carpeta...'; progEta.textContent = '';
-
-  try {
-    const res = await fetch(`${API}/api/transcribe-folder`, {
+    const r = await fetch(`${API}/api/config`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        language: document.getElementById('sel-lang').value,
-        model: document.getElementById('sel-model').value,
-        context: ctxText.value || ''
-      })
+      body: JSON.stringify(payload)
     });
-
-    if (!res.ok) {
-      let d = `Error ${res.status}`;
-      try { d = (await res.json()).detail || d; } catch(_) {}
-      throw new Error(d);
+    const cfg = await r.json();
+    if (!r.ok) {
+      mostrarConfigStatus(`❌ Error: ${cfg.detail || 'No se pudo guardar'}`, 'err');
+      return;
     }
-
-    // Streaming de progreso: el endpoint devuelve JSON Lines
-    const reader = res.body.getReader();
-    const dec = new TextDecoder();
-    let buf = '';
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buf += dec.decode(value, { stream: true });
-      const lines = buf.split('\n');
-      buf = lines.pop(); // última línea puede estar incompleta
-      for (const line of lines) {
-        if (!line.trim()) continue;
-        try {
-          const ev = JSON.parse(line);
-          handleCarpetaEvent(ev, statusEl);
-        } catch(_) {}
-      }
-    }
-  } catch(err) {
-    progStatus.textContent = `Error: ${err.message}`;
-    statusEl.textContent = `Error: ${err.message}`;
+    mostrarRutas(cfg);
+    cancelarEdicion();
+    mostrarConfigStatus('✅ Rutas guardadas. Las carpetas están listas.', 'ok');
+    // Guardar en localStorage para el próximo inicio de sesión
+    localStorage.setItem('transcriptotem_rutas', JSON.stringify(payload));
+  } catch(e) {
+    mostrarConfigStatus(`❌ Error de conexión: ${e.message}`, 'err');
   } finally {
-    btn.disabled = false; btn.textContent = '▶ Transcribir carpeta Pendientes';
+    btn.textContent = '💾 Guardar rutas'; btn.disabled = false;
   }
 }
 
-function handleCarpetaEvent(ev, statusEl) {
-  if (ev.type === 'start') {
-    progStatus.textContent = `${ev.total} archivo(s) encontrado(s) en Pendientes.`;
-    statusEl.textContent = ev.total > 0
-      ? `Procesando ${ev.total} audio(s)...`
-      : '✅ No hay archivos pendientes en la carpeta.';
-    if (ev.total === 0) { progBar.style.width = '100%'; }
+function mostrarConfigStatus(msg, tipo) {
+  const el = document.getElementById('config-status');
+  el.style.display = 'block';
+  el.textContent = msg;
+  el.style.color = tipo === 'ok' ? 'var(--ok)' : tipo === 'warn' ? 'var(--warn)' : 'var(--err)';
+  el.style.borderColor = tipo === 'ok' ? 'rgba(74,222,128,0.3)' : tipo === 'warn' ? 'rgba(251,191,36,0.3)' : 'rgba(248,113,113,0.3)';
+  setTimeout(() => { el.style.display = 'none'; }, 4000);
+}
+
+// Cargar config cuando el servidor esté activo
+// También restaurar desde localStorage si hay rutas guardadas
+async function restaurarRutasGuardadas() {
+  const saved = localStorage.getItem('transcriptotem_rutas');
+  if (saved && srvActivo) {
+    try {
+      const rutas = JSON.parse(saved);
+      await fetch(`${API}/api/config`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(rutas)
+      });
+    } catch(_) {}
   }
-  else if (ev.type === 'progress') {
-    const pct = Math.round((ev.done / ev.total) * 100);
-    progBar.style.width = pct + '%';
-    progStatus.textContent = `Transcribiendo ${ev.done}/${ev.total}: ${ev.archivo}`;
-    progEta.textContent = ev.tiempo ? `⏱ ${ev.tiempo} · Whisper activo ✓` : '';
-    statusEl.textContent = `Procesando: ${ev.archivo} (${ev.done}/${ev.total})`;
+  cargarConfig();
+}
+
+// ── i18n ───────────────────────────────────────────────────────────
+const LANG = {
+  es: {
+    tabServidor: '⚙ Servidor', tabTranscribir: '🎙 Transcribir', tabCarpeta: '☁️ Carpeta en la nube',
+    srvOff: 'Servidor apagado', srvOn: 'Servidor activo', srvStarting: 'Iniciando...',
+    srvDescOff: 'Inícialo antes de transcribir. Al apagarlo, el Mac queda 100% libre.',
+    srvDescOn: 'Whisper listo. Ve a Transcribir o a Carpeta en la nube.',
+    btnStart: '▶ Iniciar', btnStop: '⏹ Apagar', btnStarting: '⏳ Iniciando...',
+    chipOff: 'Servidor: apagado', chipOn: 'Servidor: activo',
+    whisperOff: 'Whisper: no cargado', whisperOn: 'Whisper: listo (M3 ⚡)',
+    srvLogReady: 'Presiona Iniciar para comenzar.',
+    cyclTitle: 'Ciclo de uso recomendado',
+    cyclBody: '1. Presiona <strong>Iniciar</strong> — espera el indicador verde.<br>2. Ve a <strong>🎙 Transcribir</strong> — sube archivos.<br>3. O ve a <strong>☁️ Carpeta en la nube</strong> — procesa OneDrive.<br>4. Presiona <strong>Apagar</strong> — el Mac queda 100% libre.',
+    howTitle: '¿Cómo iniciar el servidor?',
+    howBody: 'Abre Terminal, pega estos comandos y déjala minimizada:',
+    howEnd: 'La app detectará el servidor automáticamente.',
+    avisoSrv: '⚠️ El servidor no está activo. Ve a <strong>⚙ Servidor</strong> e inícialo primero.',
+    labelPreset: 'Preset por ramo', labelCtx: 'Contexto del audio',
+    labelLang: 'Perfil de idioma', labelModel: 'Modelo Whisper',
+    labelQueue: 'Archivos en cola', labelTranscript: 'Transcripción',
+    btnProcesar: '▶ Procesar todos', btnDetener: '⏹ Detener',
+    btnPick: 'Seleccionar archivos',
+    dzText: '<strong>Arrastra aquí</strong> tus archivos de audio',
+    dzHint: '.m4a · .mp3 · .wav — múltiples archivos aceptados',
+    ready: 'Listo.', queueCount: (n) => `${n} archivo(s) en cola.`,
+    folderTitle: '📁 Carpeta OneDrive — Pendientes',
+    folderDesc: 'El servidor leerá los audios de <em>Pendientes</em>, los transcribirá y los moverá a <em>Archivados</em>. Los .txt quedan en <em>Transcritas</em>.',
+    entrada: 'Entrada', salida: 'Salida', archivados: 'Archivados',
+    btnScan: 'Transcribir carpeta Pendientes',
+    lastTranscript: 'Última transcripción',
+    histEmpty: 'Aún no hay transcripciones.', histSub: 'Sesión actual.',
+    pillOff: 'Servidor apagado',
+  },
+  en: {
+    tabServidor: '⚙ Server', tabTranscribir: '🎙 Transcribe', tabCarpeta: '☁️ Cloud Folder',
+    srvOff: 'Server offline', srvOn: 'Server active', srvStarting: 'Starting...',
+    srvDescOff: 'Start it before transcribing. When off, your Mac is 100% free.',
+    srvDescOn: 'Whisper ready. Go to Transcribe or Cloud Folder.',
+    btnStart: '▶ Start', btnStop: '⏹ Stop', btnStarting: '⏳ Starting...',
+    chipOff: 'Server: offline', chipOn: 'Server: active',
+    whisperOff: 'Whisper: not loaded', whisperOn: 'Whisper: ready (M3 ⚡)',
+    srvLogReady: 'Press Start to begin.',
+    cyclTitle: 'Recommended workflow',
+    cyclBody: '1. Press <strong>Start</strong> — wait for the green indicator.<br>2. Go to <strong>🎙 Transcribe</strong> — upload audio files.<br>3. Or go to <strong>☁️ Cloud Folder</strong> — process OneDrive.<br>4. Press <strong>Stop</strong> — your Mac is completely free.',
+    howTitle: 'How to start the server?',
+    howBody: 'Open Terminal, paste these commands and minimize it:',
+    howEnd: 'The app will detect the server automatically.',
+    avisoSrv: '⚠️ Server is not active. Go to <strong>⚙ Server</strong> and start it first.',
+    labelPreset: 'Subject preset', labelCtx: 'Audio context',
+    labelLang: 'Language profile', labelModel: 'Whisper model',
+    labelQueue: 'Files in queue', labelTranscript: 'Transcription',
+    btnProcesar: '▶ Process all', btnDetener: '⏹ Stop',
+    btnPick: 'Select files',
+    dzText: '<strong>Drag here</strong> your audio files',
+    dzHint: '.m4a · .mp3 · .wav — multiple files accepted',
+    ready: 'Ready.', queueCount: (n) => `${n} file(s) in queue.`,
+    folderTitle: '📁 OneDrive Folder — Pending',
+    folderDesc: 'The server will read audios from <em>Pending</em>, transcribe them and move them to <em>Archived</em>. .txt files go to <em>Transcribed</em>.',
+    entrada: 'Input', salida: 'Output', archivados: 'Archived',
+    btnScan: 'Transcribe Pending folder',
+    lastTranscript: 'Last transcription',
+    histEmpty: 'No transcriptions yet.', histSub: 'Current session.',
+    pillOff: 'Server offline',
   }
-  else if (ev.type === 'done') {
-    progBar.style.width = '100%';
-    progStatus.textContent = `✅ ${ev.completados}/${ev.total} completados.`;
-    progEta.textContent = ev.errores > 0 ? `${ev.errores} error(es). Revisa el log del servidor.` : '';
-    statusEl.textContent = `Completado. ${ev.completados} transcripciones en carpeta Transcritas.`;
-    // Agregar al historial
-    (ev.resultados || []).forEach(r => {
-      if (r.texto) historial.unshift({ nombre: r.nombre, texto: r.texto, ts: Date.now() });
-    });
-    actualizarHistorial();
-    // Mostrar último texto en el área
-    if (ev.resultados?.length > 0 && ev.resultados[ev.resultados.length-1].texto) {
-      const last = ev.resultados[ev.resultados.length-1];
-      transcript.value = last.texto; texto = last.texto; habilitarExport();
-    }
+};
+
+let currentLang = 'es';
+
+function setLang(lang) {
+  currentLang = lang;
+  document.getElementById('lang-es').classList.toggle('active', lang === 'es');
+  document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+  const t = LANG[lang];
+
+  // Tabs
+  const tabs = document.querySelectorAll('.tab-btn');
+  if(tabs[0]) tabs[0].textContent = t.tabServidor;
+  if(tabs[1]) tabs[1].textContent = t.tabTranscribir;
+  if(tabs[2]) tabs[2].textContent = t.tabCarpeta;
+
+  // Server panel static text
+  const cyclInfo = document.getElementById('info-cycle');
+  if(cyclInfo) cyclInfo.innerHTML = `<strong>${t.cyclTitle}</strong><br>${t.cyclBody}`;
+  const howInfo = document.getElementById('info-how');
+  if(howInfo) {
+    const pre = howInfo.querySelector('pre');
+    const preHTML = pre ? pre.outerHTML : '';
+    howInfo.innerHTML = `<strong>${t.howTitle}</strong><br>${t.howBody}<div class="code-block">${preHTML}<button class="btn-copy" id="btn-copy-cmd" onclick="copiarComandos()">📋 Copiar</button></div>${t.howEnd}`;
   }
-  else if (ev.type === 'error') {
-    progStatus.textContent = `❌ Error en ${ev.archivo}: ${ev.mensaje}`;
+
+  // Transcribe panel
+  const avisoSrv = document.getElementById('aviso-srv');
+  if(avisoSrv) avisoSrv.innerHTML = t.avisoSrv;
+
+  const lblPreset = document.querySelector('label[for="ctx-preset"]');
+  if(lblPreset) lblPreset.textContent = t.labelPreset;
+  const lblCtx = document.querySelector('label[for="ctx-text"]');
+  if(lblCtx) lblCtx.textContent = t.labelCtx;
+  const lblLang = document.querySelector('label[for="sel-lang"]');
+  if(lblLang) lblLang.textContent = t.labelLang;
+  const lblModel = document.querySelector('label[for="sel-model"]');
+  if(lblModel) lblModel.textContent = t.labelModel;
+
+  const dzTxt = document.querySelector('.dz-text');
+  if(dzTxt) dzTxt.innerHTML = t.dzText;
+  const dzHint = document.querySelector('.dz-hint');
+  if(dzHint) dzHint.textContent = t.dzHint;
+  const btnPickEl = document.getElementById('btn-pick');
+  if(btnPickEl) btnPickEl.textContent = t.btnPick;
+  const btnProcEl = document.getElementById('btn-procesar');
+  if(btnProcEl) btnProcEl.textContent = t.btnProcesar;
+  const btnDetEl = document.getElementById('btn-detener');
+  if(btnDetEl) btnDetEl.textContent = t.btnDetener;
+
+  // Queue / transcript labels
+  const queueLabel = document.querySelector('#queue-wrap .section-label');
+  if(queueLabel) queueLabel.textContent = t.labelQueue;
+  const transcriptLabel = document.querySelector('.transcript-wrap .section-label');
+  if(transcriptLabel) transcriptLabel.textContent = t.labelTranscript;
+
+  // Carpeta panel
+  const ftEl = document.getElementById('t-folder-title');
+  if(ftEl) ftEl.textContent = t.folderTitle;
+  const fdEl = document.getElementById('t-folder-desc');
+  if(fdEl) fdEl.innerHTML = t.folderDesc;
+  const entEl = document.getElementById('t-entrada');
+  if(entEl) entEl.textContent = t.entrada;
+  const salEl = document.getElementById('t-salida');
+  if(salEl) salEl.textContent = t.salida;
+  const arcEl = document.getElementById('t-archivados');
+  if(arcEl) arcEl.textContent = t.archivados;
+  const scanBtn = document.getElementById('t-btn-scan');
+  if(scanBtn) scanBtn.textContent = t.btnScan;
+  const ltEl = document.getElementById('t-last-transcript');
+  if(ltEl) ltEl.textContent = t.lastTranscript;
+  const lcEl = document.getElementById('t-lang-carpeta');
+  if(lcEl) lcEl.textContent = t.labelLang;
+  const mcEl = document.getElementById('t-model-carpeta');
+  if(mcEl) mcEl.textContent = t.labelModel;
+
+  // Historial
+  const histSubEl = document.querySelector('.sidebar-sub');
+  if(histSubEl) histSubEl.textContent = t.histSub;
+  const histEmptyEl = document.getElementById('hist-empty');
+  if(histEmptyEl && !historial.length) histEmptyEl.textContent = t.histEmpty;
+
+  // Pill
+  if(!srvActivo) {
+    const pillTxt = document.getElementById('hdr-txt');
+    if(pillTxt) pillTxt.textContent = t.pillOff;
   }
 }
 
-function pad(n) { return String(n).padStart(2,'0'); }
-
-// ── EXPORTACIÓN ────────────────────────────────────────────────
-function habilitarExport() {
-  const hay = (transcript.value || '').trim().length > 0;
-  [btnTxt, btnPdf, btnDocx, btnZip].forEach(b => b.disabled = !hay);
-}
-transcript.addEventListener('input', habilitarExport);
-
-function descargarTxt(nombre, contenido) {
-  const base = nombre.replace(/\.[^/.]+$/u, '');
-  const a = Object.assign(document.createElement('a'), {
-    href: URL.createObjectURL(new Blob([contenido], {type:'text/plain;charset=utf-8'})),
-    download: `${base}.txt`
-  });
-  document.body.appendChild(a); a.click(); a.remove();
-}
-
-btnTxt.addEventListener('click', () => {
-  const t = archivoActual?.texto || transcript.value || '';
-  if (t.trim()) descargarTxt(archivoActual?.nombre || 'transcripcion', t);
+// Apply default preset on load
+window.addEventListener('DOMContentLoaded', () => {
+  const preset = document.querySelector('#ctx-preset option[selected]');
+  if (preset) {
+    const prompt = preset.getAttribute('data-prompt');
+    if (prompt) document.getElementById('ctx-text').value = prompt;
+  }
 });
-
-async function exportarAPI(endpoint, ext) {
-  const t = (archivoActual?.texto || transcript.value || '').trim(); if (!t) return;
-  const nombre = (archivoActual?.nombre || 'transcripcion').replace(/\.[^/.]+$/u, '');
-  try {
-    const res = await fetch(`${API}/api/export/${endpoint}`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ text: t, filename: nombre })
-    });
-    if (!res.ok) return;
-    const blob = await res.blob();
-    const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: `${nombre}.${ext}` });
-    document.body.appendChild(a); a.click(); a.remove();
-  } catch(e) { console.error(e); }
-}
-
-btnPdf.addEventListener('click',  () => exportarAPI('pdf',  'pdf'));
-btnDocx.addEventListener('click', () => exportarAPI('docx', 'docx'));
-btnZip.addEventListener('click', async () => {
-  if (!historial.length) return;
-  try {
-    const res = await fetch(`${API}/api/export/zip`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ items: historial.map(h => ({ filename: h.nombre, text: h.texto })) })
-    });
-    if (!res.ok) return;
-    const blob = await res.blob();
-    const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: 'transcripciones.zip' });
-    document.body.appendChild(a); a.click(); a.remove();
-  } catch(e) { console.error(e); }
-});
-  // ── Copiar comandos Terminal ───────────────────────────────────
-  function copiarCtrlC() {
-    // Ctrl+C no se puede copiar literalmente al clipboard con utilidad directa,
-    // así que copiamos el texto descriptivo
-    navigator.clipboard.writeText('Ctrl + C').catch(() => {});
-    const btn = document.getElementById('btn-copy-shutdown');
-    if (btn) {
-      const orig = btn.textContent;
-      btn.textContent = '✅ Copiado';
-      btn.style.color = 'var(--mint)';
-      setTimeout(() => { btn.textContent = orig; btn.style.color = ''; }, 2000);
-    }
-  }
-
-  function copiarComandos() {
-    const cmds = `cd "/Users/TU_USUARIO/ruta/a/Transcriptotem_WebApp_BACKUP"\nsource venv/bin/activate && python3 main.py`;
-    navigator.clipboard.writeText(cmds).then(() => {
-      const btn = document.getElementById('btn-copy-cmd');
-      if (btn) { const orig = btn.textContent; btn.textContent = '✅ Copiado'; btn.style.color='var(--mint)'; setTimeout(() => { btn.textContent = orig; btn.style.color=''; }, 2000); }
-    }).catch(() => {
-      // Fallback para navegadores sin clipboard API
-      const ta = document.createElement('textarea');
-      ta.value = cmds; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
-    });
-  }
-
 </script>
 </body>
 </html>
