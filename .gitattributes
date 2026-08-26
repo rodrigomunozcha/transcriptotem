@@ -1,0 +1,4 @@
+# El archivo index.html es la interfaz de la app, no el proyecto.
+# Sin esta linea GitHub cuenta sus 79 KB y anuncia el repositorio como HTML
+# en vez de Python. Verificado contra la documentacion de GitHub Linguist.
+index.html linguist-vendored
