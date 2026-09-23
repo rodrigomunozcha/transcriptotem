@@ -24,11 +24,43 @@ from backend.transcriber import transcribe
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# ── Carpetas OneDrive ──────────────────────────────────────────
-ONEDRIVE   = Path.home() / "Library" / "CloudStorage" / "OneDrive-Personal" / "3 Recursos"
-PENDIENTES = ONEDRIVE / "Grabaciones Clases" / "Pendientes"
-TRANSCRITAS = ONEDRIVE / "Grabaciones Clases" / "Transcritas"
-ARCHIVADOS  = ONEDRIVE / "Grabaciones Clases" / "Archivados"
+# ── Carpetas de trabajo ────────────────────────────────────────
+# Antes estaban fijas en el codigo y apuntaban a la carpeta de una persona,
+# asi que el modo carpeta no funcionaba en ningun otro equipo. Ahora las
+# elige quien usa el programa, desde la pestana "Carpeta en la nube", y
+# quedan en config.json, que no se sube al repositorio.
+#
+# El valor por defecto va dentro del home y no depende de ningun servicio de
+# nube. Sirve igual con una carpeta sincronizada: basta escribir su ruta.
+CONFIG_PATH = BASE_DIR / "config.json"
+CLAVES_CARPETAS = ("pendientes", "transcritas", "archivados")
+CARPETA_POR_DEFECTO = Path.home() / "Transcriptotem"
+
+
+def _carpetas_por_defecto() -> dict:
+    return {c: str(CARPETA_POR_DEFECTO / c.capitalize()) for c in CLAVES_CARPETAS}
+
+
+def leer_carpetas() -> dict:
+    """Las tres rutas configuradas. Si falta config.json, las por defecto."""
+    try:
+        guardada = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        guardada = {}
+    carpetas = _carpetas_por_defecto()
+    for clave in CLAVES_CARPETAS:
+        valor = str(guardada.get(clave, "")).strip()
+        if valor:
+            carpetas[clave] = str(Path(valor).expanduser())
+    return carpetas
+
+
+def _con_estado(carpetas: dict) -> dict:
+    """Agrega <clave>_ok, que la interfaz usa para colorear cada ruta."""
+    salida = dict(carpetas)
+    for clave in CLAVES_CARPETAS:
+        salida[f"{clave}_ok"] = Path(carpetas[clave]).is_dir()
+    return salida
 
 EXTENSIONES = {".m4a", ".mp3", ".wav"}
 
@@ -134,6 +166,31 @@ def _evento(obj: dict) -> str:
     return json.dumps(obj, ensure_ascii=False) + "\n"
 
 
+@app.get("/api/config")
+def leer_config():
+    """Las tres carpetas y si cada una existe en disco."""
+    return _con_estado(leer_carpetas())
+
+
+@app.post("/api/config")
+def guardar_config(payload: dict):
+    """
+    Guarda las rutas que escribio quien usa el programa. Una ruta vacia deja
+    la anterior en pie, para que un campo en blanco no borre lo ya guardado.
+    """
+    carpetas = leer_carpetas()
+    for clave in CLAVES_CARPETAS:
+        valor = str(payload.get(clave, "")).strip()
+        if valor:
+            carpetas[clave] = str(Path(valor).expanduser())
+    try:
+        CONFIG_PATH.write_text(
+            json.dumps(carpetas, ensure_ascii=False, indent=2), encoding="utf-8")
+    except OSError as e:
+        raise HTTPException(500, f"No se pudo guardar config.json: {e}")
+    return _con_estado(carpetas)
+
+
 @app.post("/api/transcribe-folder")
 def transcribe_folder(payload: dict):
     """
@@ -145,12 +202,17 @@ def transcribe_folder(payload: dict):
     model    = payload.get("model",    "mlx-community/whisper-large-v3-turbo")
     context  = payload.get("context",  "")
 
+    carpetas = leer_carpetas()
+    pendientes  = Path(carpetas["pendientes"])
+    transcritas = Path(carpetas["transcritas"])
+    archivados  = Path(carpetas["archivados"])
+
     # Crear carpetas si no existen
-    for c in [PENDIENTES, TRANSCRITAS, ARCHIVADOS]:
+    for c in [pendientes, transcritas, archivados]:
         c.mkdir(parents=True, exist_ok=True)
 
     def generar():
-        audios = _audios_estables(PENDIENTES)
+        audios = _audios_estables(pendientes)
         total  = len(audios)
         yield _evento({"type": "start", "total": total})
 
@@ -174,10 +236,10 @@ def transcribe_folder(payload: dict):
                 )
 
                 if text.strip():
-                    txt_path = TRANSCRITAS / f"{ruta.stem}.txt"
+                    txt_path = transcritas / f"{ruta.stem}.txt"
                     txt_path.write_text(text, encoding="utf-8")
 
-                shutil.move(str(ruta), str(ARCHIVADOS / ruta.name))
+                shutil.move(str(ruta), str(archivados / ruta.name))
 
                 elapsed = round(time.time() - t0)
                 mm, ss  = elapsed // 60, elapsed % 60

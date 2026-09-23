@@ -82,16 +82,23 @@ transcriptotem/
 
 ---
 
-## Configuración de carpetas (modo carpeta OneDrive)
+## Configuración de carpetas (modo carpeta)
 
-Edita las rutas en `backend/app.py` para que apunten a tus carpetas:
+Las rutas se eligen desde la interfaz, en la pestaña **Carpeta en la nube**. No hay
+que tocar el código.
 
-```python
-ONEDRIVE    = Path.home() / "tu" / "ruta" / "carpeta-base"
-PENDIENTES  = ONEDRIVE / "Pendientes"   # audios a transcribir
-TRANSCRITAS = ONEDRIVE / "Transcritas"  # .txt generados
-ARCHIVADOS  = ONEDRIVE / "Archivados"   # audios ya procesados
-```
+| Carpeta | Qué guarda |
+|---|---|
+| Pendientes | los audios por transcribir |
+| Transcritas | los `.txt` generados |
+| Archivados | los audios ya procesados |
+
+Quedan escritas en `config.json`, que no se sube al repositorio. Sin configurar nada
+se usan `~/Transcriptotem/Pendientes`, `~/Transcriptotem/Transcritas` y
+`~/Transcriptotem/Archivados`, y se crean solas al procesar por primera vez.
+
+Sirve igual con una carpeta sincronizada de OneDrive, iCloud o Dropbox. Basta escribir
+su ruta.
 
 ---
 

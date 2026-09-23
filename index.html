@@ -642,7 +642,7 @@
         <div class="info" id="info-cycle">
           <strong>Ciclo de uso recomendado</strong><br>
           1. Presiona <strong>Iniciar</strong> - espera el indicador verde.<br>
-          2. Ve a <strong>🎙 Transcribir</strong> - sube archivos o procesa la carpeta OneDrive.<br>
+          2. Ve a <strong>🎙 Transcribir</strong> - sube archivos o procesa la carpeta en la nube.<br>
           3. Descarga tus .txt cuando termines.<br>
           4. Presiona <strong>Apagar</strong> - el Mac queda 100% libre.
         </div>
@@ -791,7 +791,7 @@ source venv/bin/activate && python3 main.py</pre>
             <div class="folder-info" style="flex:1; min-width:0;">
               <div class="folder-lbl" id="t-entrada">Audios a transcribir (Pendientes)</div>
               <div class="folder-path" id="display-pendientes" style="cursor:pointer;" title="Haz clic para editar">-</div>
-              <input id="input-pendientes" type="text" class="folder-input" style="display:none;" placeholder="Ej: /Users/tuusuario/OneDrive/Pendientes">
+              <input id="input-pendientes" type="text" class="folder-input" style="display:none;" placeholder="Ej: ~/Transcriptotem/Pendientes">
             </div>
             <button class="btn-edit" id="btn-edit-pendientes" onclick="toggleEdit('pendientes')">✏️</button>
           </div>
@@ -802,7 +802,7 @@ source venv/bin/activate && python3 main.py</pre>
             <div class="folder-info" style="flex:1; min-width:0;">
               <div class="folder-lbl" id="t-salida">Transcripciones .txt (Transcritas)</div>
               <div class="folder-path" id="display-transcritas" style="cursor:pointer;" title="Haz clic para editar">-</div>
-              <input id="input-transcritas" type="text" class="folder-input" style="display:none;" placeholder="Ej: /Users/tuusuario/OneDrive/Transcritas">
+              <input id="input-transcritas" type="text" class="folder-input" style="display:none;" placeholder="Ej: ~/Transcriptotem/Transcritas">
             </div>
             <button class="btn-edit" id="btn-edit-transcritas" onclick="toggleEdit('transcritas')">✏️</button>
           </div>
@@ -813,7 +813,7 @@ source venv/bin/activate && python3 main.py</pre>
             <div class="folder-info" style="flex:1; min-width:0;">
               <div class="folder-lbl" id="t-archivados">Audios procesados (Archivados)</div>
               <div class="folder-path" id="display-archivados" style="cursor:pointer;" title="Haz clic para editar">-</div>
-              <input id="input-archivados" type="text" class="folder-input" style="display:none;" placeholder="Ej: /Users/tuusuario/OneDrive/Archivados">
+              <input id="input-archivados" type="text" class="folder-input" style="display:none;" placeholder="Ej: ~/Transcriptotem/Archivados">
             </div>
             <button class="btn-edit" id="btn-edit-archivados" onclick="toggleEdit('archivados')">✏️</button>
           </div>
@@ -888,7 +888,7 @@ const dropZone=document.getElementById('drop-zone'),fileInput=document.getElemen
 document.querySelectorAll('.tab-btn').forEach(btn=>{btn.addEventListener('click',()=>{document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));btn.classList.add('active');document.getElementById('panel-'+btn.dataset.tab).classList.add('active');});});
 document.getElementById('btn-collapse').addEventListener('click',()=>{const sb=document.getElementById('sidebar');const c=sb.classList.toggle('collapsed');document.getElementById('btn-collapse').textContent=c?'⟩':'⟨';});
 function setMode(mode){modoActual=mode;document.getElementById('mode-manual').classList.toggle('active',mode==='manual');document.getElementById('mode-carpeta').classList.toggle('active',mode==='carpeta');document.getElementById('panel-manual').style.display=mode==='manual'?'block':'none';document.getElementById('panel-carpeta').style.display=mode==='carpeta'?'block':'none';progBar.style.width='0%';progStatus.textContent='Listo.';progEta.textContent='';}
-function setSrvUI(estado){const dot=document.getElementById('hdr-dot'),txt=document.getElementById('hdr-txt'),btn=document.getElementById('btn-srv'),icon=document.getElementById('srv-icon'),title=document.getElementById('srv-title'),desc=document.getElementById('srv-desc'),cSrv=document.getElementById('chip-srv'),cWsp=document.getElementById('chip-wsp'),aviso=document.getElementById('aviso-srv');dot.className='srv-dot';[cSrv,cWsp].forEach(c=>c.className='chip');if(estado==='off'){txt.textContent='Servidor apagado';btn.textContent='▶ Iniciar';btn.className='btn-srv start';btn.disabled=false;icon.textContent='🖥️';title.textContent='Servidor apagado';desc.textContent='Inícialo antes de transcribir. Al apagarlo, el Mac queda 100% libre.';cSrv.innerHTML='<div class="chip-dot"></div><span>Servidor: apagado</span>';cWsp.innerHTML='<div class="chip-dot"></div><span>Whisper: no cargado</span>';aviso.style.display='block';if(modoActual==='transcripcion')setHeaderBadge('off');srvActivo=false;}else if(estado==='starting'){dot.classList.add('mid');txt.textContent='Iniciando...';btn.textContent='⏳ Iniciando...';btn.disabled=true;icon.textContent='⏳';title.textContent='Iniciando servidor...';desc.textContent='Cargando Whisper en el M3. Tarda unos segundos.';}else if(estado==='on'){dot.classList.add('on');txt.textContent='Servidor activo';btn.textContent='⏹ Apagar';btn.className='btn-srv stop';btn.disabled=false;icon.textContent='✅';title.textContent='Servidor activo';desc.textContent='Whisper listo. Ve a Transcribir y sube tus audios o procesa la carpeta OneDrive.';cSrv.classList.add('ok');cSrv.innerHTML='<div class="chip-dot"></div><span>Servidor: activo</span>';cWsp.classList.add('ok');cWsp.innerHTML='<div class="chip-dot"></div><span>Whisper: listo (M3 ⚡)</span>';aviso.style.display='none';if(modoActual==='transcripcion')setHeaderBadge('on');srvActivo=true;}}
+function setSrvUI(estado){const dot=document.getElementById('hdr-dot'),txt=document.getElementById('hdr-txt'),btn=document.getElementById('btn-srv'),icon=document.getElementById('srv-icon'),title=document.getElementById('srv-title'),desc=document.getElementById('srv-desc'),cSrv=document.getElementById('chip-srv'),cWsp=document.getElementById('chip-wsp'),aviso=document.getElementById('aviso-srv');dot.className='srv-dot';[cSrv,cWsp].forEach(c=>c.className='chip');if(estado==='off'){txt.textContent='Servidor apagado';btn.textContent='▶ Iniciar';btn.className='btn-srv start';btn.disabled=false;icon.textContent='🖥️';title.textContent='Servidor apagado';desc.textContent='Inícialo antes de transcribir. Al apagarlo, el Mac queda 100% libre.';cSrv.innerHTML='<div class="chip-dot"></div><span>Servidor: apagado</span>';cWsp.innerHTML='<div class="chip-dot"></div><span>Whisper: no cargado</span>';aviso.style.display='block';if(modoActual==='transcripcion')setHeaderBadge('off');srvActivo=false;}else if(estado==='starting'){dot.classList.add('mid');txt.textContent='Iniciando...';btn.textContent='⏳ Iniciando...';btn.disabled=true;icon.textContent='⏳';title.textContent='Iniciando servidor...';desc.textContent='Cargando Whisper en el M3. Tarda unos segundos.';}else if(estado==='on'){dot.classList.add('on');txt.textContent='Servidor activo';btn.textContent='⏹ Apagar';btn.className='btn-srv stop';btn.disabled=false;icon.textContent='✅';title.textContent='Servidor activo';desc.textContent='Whisper listo. Ve a Transcribir y sube tus audios o procesa la carpeta en la nube.';cSrv.classList.add('ok');cSrv.innerHTML='<div class="chip-dot"></div><span>Servidor: activo</span>';cWsp.classList.add('ok');cWsp.innerHTML='<div class="chip-dot"></div><span>Whisper: listo (M3 ⚡)</span>';aviso.style.display='none';if(modoActual==='transcripcion')setHeaderBadge('on');srvActivo=true;}}
 function setHeaderBadge(e){const dot=document.getElementById('hdr-dot'),txt=document.getElementById('hdr-txt');dot.className='srv-dot';if(e==='off')txt.textContent='Servidor apagado';else if(e==='on'){dot.classList.add('on');txt.textContent='Servidor activo';}}
 function logSrv(msg){const t=new Date().toLocaleTimeString('es-CL');document.getElementById('srv-log').innerHTML=`[${t}] ${msg}`;}
 async function ping(){try{const r=await fetch(`${API}/`,{signal:AbortSignal.timeout(2000)});return r.status<500;}catch{return false;}}
@@ -1064,7 +1064,7 @@ const LANG = {
     whisperOff: 'Whisper: no cargado', whisperOn: 'Whisper: listo (M3 ⚡)',
     srvLogReady: 'Presiona Iniciar para comenzar.',
     cyclTitle: 'Ciclo de uso recomendado',
-    cyclBody: '1. Presiona <strong>Iniciar</strong> - espera el indicador verde.<br>2. Ve a <strong>🎙 Transcribir</strong> - sube archivos.<br>3. O ve a <strong>☁️ Carpeta en la nube</strong> - procesa OneDrive.<br>4. Presiona <strong>Apagar</strong> - el Mac queda 100% libre.',
+    cyclBody: '1. Presiona <strong>Iniciar</strong> - espera el indicador verde.<br>2. Ve a <strong>🎙 Transcribir</strong> - sube archivos.<br>3. O ve a <strong>☁️ Carpeta en la nube</strong> - procesa la carpeta en la nube.<br>4. Presiona <strong>Apagar</strong> - el Mac queda 100% libre.',
     howTitle: '¿Cómo iniciar el servidor?',
     howBody: 'Abre Terminal, pega estos comandos y déjala minimizada:',
     howEnd: 'La app detectará el servidor automáticamente.',
@@ -1077,7 +1077,7 @@ const LANG = {
     dzText: '<strong>Arrastra aquí</strong> tus archivos de audio',
     dzHint: '.m4a · .mp3 · .wav - múltiples archivos aceptados',
     ready: 'Listo.', queueCount: (n) => `${n} archivo(s) en cola.`,
-    folderTitle: '📁 Carpeta OneDrive - Pendientes',
+    folderTitle: '📁 Carpeta en la nube - Pendientes',
     folderDesc: 'El servidor leerá los audios de <em>Pendientes</em>, los transcribirá y los moverá a <em>Archivados</em>. Los .txt quedan en <em>Transcritas</em>.',
     entrada: 'Entrada', salida: 'Salida', archivados: 'Archivados',
     btnScan: 'Transcribir carpeta Pendientes',
@@ -1095,7 +1095,7 @@ const LANG = {
     whisperOff: 'Whisper: not loaded', whisperOn: 'Whisper: ready (M3 ⚡)',
     srvLogReady: 'Press Start to begin.',
     cyclTitle: 'Recommended workflow',
-    cyclBody: '1. Press <strong>Start</strong> - wait for the green indicator.<br>2. Go to <strong>🎙 Transcribe</strong> - upload audio files.<br>3. Or go to <strong>☁️ Cloud Folder</strong> - process OneDrive.<br>4. Press <strong>Stop</strong> - your Mac is completely free.',
+    cyclBody: '1. Press <strong>Start</strong> - wait for the green indicator.<br>2. Go to <strong>🎙 Transcribe</strong> - upload audio files.<br>3. Or go to <strong>☁️ Cloud Folder</strong> - process the cloud folder.<br>4. Press <strong>Stop</strong> - your Mac is completely free.',
     howTitle: 'How to start the server?',
     howBody: 'Open Terminal, paste these commands and minimize it:',
     howEnd: 'The app will detect the server automatically.',
@@ -1108,7 +1108,7 @@ const LANG = {
     dzText: '<strong>Drag here</strong> your audio files',
     dzHint: '.m4a · .mp3 · .wav - multiple files accepted',
     ready: 'Ready.', queueCount: (n) => `${n} file(s) in queue.`,
-    folderTitle: '📁 OneDrive Folder - Pending',
+    folderTitle: '📁 Cloud Folder - Pending',
     folderDesc: 'The server will read audios from <em>Pending</em>, transcribe them and move them to <em>Archived</em>. .txt files go to <em>Transcribed</em>.',
     entrada: 'Input', salida: 'Output', archivados: 'Archived',
     btnScan: 'Transcribe Pending folder',
